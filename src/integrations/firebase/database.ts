@@ -57,7 +57,10 @@ class QueryBuilder {
 
   async execute(): Promise<{ data: any; error: any; count?: number }> {
     try {
-      const q = query(this.collectionRef, ...this.constraints);
+      const q = this.constraints.length > 0
+        ? query(this.collectionRef, ...this.constraints)
+        : this.collectionRef;
+
       const querySnapshot = await getDocs(q);
 
       const data = querySnapshot.docs.map(doc => ({
@@ -65,10 +68,13 @@ class QueryBuilder {
         ...doc.data()
       }));
 
-      // If single() was called, return just the first item
-      const isSingle = this.constraints.some(c => (c as any).type === 'limit' && (c as any).limit === 1);
+      // Check if single() was called by looking for limit(1)
+      const hasLimitOne = this.constraints.some(constraint => {
+        // Check if this is a limit constraint with value 1
+        return constraint.toString().includes('limit') && constraint.toString().includes('1');
+      });
 
-      if (isSingle) {
+      if (hasLimitOne) {
         return {
           data: data[0] || null,
           error: null,
@@ -82,6 +88,7 @@ class QueryBuilder {
         count: this.includeCount ? data.length : undefined
       };
     } catch (error) {
+      console.error('Firebase query error:', error);
       return {
         data: null,
         error,

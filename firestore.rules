@@ -1,0 +1,48 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Allow authenticated users to read and write their own profile
+    match /profiles/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+      // Allow admins to read all profiles
+      allow read: if request.auth != null && 
+        exists(/databases/$(database)/documents/profiles/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/profiles/$(request.auth.uid)).data.role == 'admin';
+    }
+    
+    // Allow authenticated users to read and write teachers collection
+    match /teachers/{teacherId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && 
+        (request.auth.uid == resource.data.user_id || 
+         exists(/databases/$(database)/documents/profiles/$(request.auth.uid)) &&
+         get(/databases/$(database)/documents/profiles/$(request.auth.uid)).data.role in ['admin', 'teacher']);
+    }
+    
+    // Allow authenticated users to read schools collection
+    match /schools/{schoolId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && 
+        (request.auth.uid == resource.data.user_id || 
+         exists(/databases/$(database)/documents/profiles/$(request.auth.uid)) &&
+         get(/databases/$(database)/documents/profiles/$(request.auth.uid)).data.role in ['admin', 'school']);
+    }
+    
+    // Allow authenticated users to read and write applications
+    match /applications/{applicationId} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // Allow authenticated users to read and write notifications
+    match /notifications/{notificationId} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // Allow admins to read and write all documents
+    match /{document=**} {
+      allow read, write: if request.auth != null && 
+        exists(/databases/$(database)/documents/profiles/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/profiles/$(request.auth.uid)).data.role == 'admin';
+    }
+  }
+}
