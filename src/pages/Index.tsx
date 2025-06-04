@@ -8,7 +8,6 @@ import { Link } from "react-router-dom";
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import TeacherCard from '@/components/TeacherCard';
-import ContactForm from '@/components/ContactForm';
 import Testimonials from '@/components/Testimonials';
 
 const Index = () => {
@@ -124,6 +123,7 @@ const Index = () => {
             </div>
 
             <div className="hidden md:flex items-center space-x-8">
+              <Link to="/about" className="text-gray-700 hover:text-blue-600 transition-all duration-300 font-medium hover:scale-105">About Us</Link>
               <a href="#services" className="text-gray-700 hover:text-blue-600 transition-all duration-300 font-medium hover:scale-105">Services</a>
               <a href="#teachers" className="text-gray-700 hover:text-blue-600 transition-all duration-300 font-medium hover:scale-105">Teachers</a>
               <a href="#contact" className="text-gray-700 hover:text-blue-600 transition-all duration-300 font-medium hover:scale-105">Contact</a>
@@ -383,8 +383,7 @@ const Index = () => {
 
       {/* Blog/News Section removed as requested */}
 
-      {/* Contact Form Section */}
-      <ContactForm />
+      {/* Contact Form Section removed - replaced with About Us page */}
 
       {/* Footer */}
       <footer className="bg-gray-900 text-white py-12">

@@ -8,6 +8,7 @@ import { AuthProvider } from "./contexts/AuthContext";
 import { RealTimeDataProvider } from "./contexts/RealTimeDataContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Index from "./pages/Index";
+import AboutUs from "./pages/AboutUs";
 import Auth from "./pages/Auth";
 import AdminDashboard from "./pages/AdminDashboard";
 import TeacherPortal from "./pages/TeacherPortal";
@@ -28,6 +29,7 @@ const App = () => (
           <RealTimeDataProvider>
             <Routes>
             <Route path="/" element={<Index />} />
+            <Route path="/about" element={<AboutUs />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/hire-teachers" element={<HireTeachers />} />
             <Route path="/subscription" element={<SubscriptionPage />} />
