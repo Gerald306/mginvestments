@@ -4,103 +4,62 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Users, Building2, CheckCircle, Clock, Eye, UserPlus, School, BarChart3, Mail, ArrowLeft, Home } from "lucide-react";
+import { Users, Building2, CheckCircle, Clock, Eye, UserPlus, School, BarChart3, Mail, ArrowLeft, Home, TrendingUp, Activity, Zap } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from '@/contexts/AuthContext';
+import { useRealTimeData } from '@/contexts/RealTimeDataContext';
 import { supabase } from '@/integrations/supabase/client';
 import AddTeacherModal from '@/components/AddTeacherModal';
 import AddSchoolModal from '@/components/AddSchoolModal';
 import ApplicationsManagement from '@/components/ApplicationsManagement';
 import NotificationSystem from '@/components/NotificationSystem';
 import FileUploadManager from '@/components/FileUploadManager';
+import AdminActionButtons from '@/components/AdminActionButtons';
+import RealTimeTeachersDisplay from '@/components/RealTimeTeachersDisplay';
+import RealTimeSchoolsDisplay from '@/components/RealTimeSchoolsDisplay';
 
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
   const { profile } = useAuth();
-  const [stats, setStats] = useState({
-    totalTeachers: 0,
-    activeSchools: 0,
-    placements: 0,
-    pendingApplications: 0
-  });
-  const [teachers, setTeachers] = useState([]);
-  const [schools, setSchools] = useState([]);
-  const [recentActivity, setRecentActivity] = useState([]);
+  const { stats, recentActivity, addTeacher, addSchool } = useRealTimeData();
 
-  useEffect(() => {
-    if (profile?.role === 'admin') {
-      fetchStats();
-      fetchTeachers();
-      fetchSchools();
-      fetchRecentActivity();
-    }
-  }, [profile]);
+  // Using real-time data context - no need for manual fetching
 
-  const fetchStats = async () => {
-    try {
-      const [teachersResult, schoolsResult, applicationsResult] = await Promise.all([
-        supabase.from('teachers').select('*', { count: 'exact' }),
-        supabase.from('schools').select('*', { count: 'exact' }),
-        supabase.from('job_applications').select('*', { count: 'exact' }).eq('status', 'pending')
-      ]);
-
-      setStats({
-        totalTeachers: teachersResult.count || 0,
-        activeSchools: schoolsResult.count || 0,
-        placements: Math.floor((teachersResult.count || 0) * 0.65),
-        pendingApplications: applicationsResult.count || 0
-      });
-    } catch (error) {
-      console.error('Error fetching stats:', error);
-    }
-  };
-
-  const fetchTeachers = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('teachers')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(10);
-
-      if (error) throw error;
-      setTeachers(data || []);
-    } catch (error) {
-      console.error('Error fetching teachers:', error);
-    }
-  };
-
-  const fetchSchools = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('schools')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(10);
-
-      if (error) throw error;
-      setSchools(data || []);
-    } catch (error) {
-      console.error('Error fetching schools:', error);
-    }
-  };
-
-  const fetchRecentActivity = async () => {
-    // This would typically fetch from an activity log table
-    // For now, we'll use mock data
-    setRecentActivity([
-      { type: "Teacher Registration", name: "Sarah Nakamya", time: "2 hours ago", status: "pending" },
-      { type: "School Application", name: "St. Mary's College", time: "4 hours ago", status: "approved" },
-      { type: "Teacher Placement", name: "John Ssali → Kampala High", time: "1 day ago", status: "completed" },
-      { type: "Account Expiry", name: "15 teacher accounts", time: "1 day ago", status: "warning" }
-    ]);
-  };
+  // All data is now managed by the RealTimeDataContext
 
   const statsData = [
-    { label: "Total Teachers", value: stats.totalTeachers.toString(), change: "+12", icon: <Users className="h-5 w-5" />, color: "text-blue-600" },
-    { label: "Active Schools", value: stats.activeSchools.toString(), change: "+5", icon: <Building2 className="h-5 w-5" />, color: "text-green-600" },
-    { label: "Placements Made", value: stats.placements.toString(), change: "+23", icon: <CheckCircle className="h-5 w-5" />, color: "text-purple-600" },
-    { label: "Pending Applications", value: stats.pendingApplications.toString(), change: "-8", icon: <Clock className="h-5 w-5" />, color: "text-orange-600" }
+    {
+      label: "Total Teachers",
+      value: stats.totalTeachers.toString(),
+      change: `+${stats.todayRegistrations}`,
+      icon: <Users className="h-5 w-5" />,
+      color: "from-blue-500 to-cyan-500",
+      bgColor: "bg-gradient-to-r from-blue-500 to-cyan-500"
+    },
+    {
+      label: "Active Schools",
+      value: stats.activeSchools.toString(),
+      change: `${stats.monthlyGrowth}%`,
+      icon: <Building2 className="h-5 w-5" />,
+      color: "from-emerald-500 to-teal-500",
+      bgColor: "bg-gradient-to-r from-emerald-500 to-teal-500"
+    },
+    {
+      label: "Pending Applications",
+      value: stats.pendingApplications.toString(),
+      change: "Live",
+      icon: <Clock className="h-5 w-5" />,
+      color: "from-amber-500 to-orange-500",
+      bgColor: "bg-gradient-to-r from-amber-500 to-orange-500"
+    },
+    {
+      label: "Expiring Accounts",
+      value: stats.expiringAccounts.toString(),
+      change: "7 days",
+      icon: <Activity className="h-5 w-5" />,
+      color: "from-red-500 to-pink-500",
+      bgColor: "bg-gradient-to-r from-red-500 to-pink-500"
+    }
   ];
 
   const getStatusColor = (status: string) => {
@@ -156,8 +115,8 @@ const AdminDashboard = () => {
               </div>
             </div>
             <div className="flex items-center space-x-4">
-              <AddTeacherModal onTeacherAdded={fetchTeachers} />
-              <AddSchoolModal onSchoolAdded={fetchSchools} />
+              <AddTeacherModal onTeacherAdded={addTeacher} />
+              <AddSchoolModal onSchoolAdded={addSchool} />
             </div>
           </div>
         </div>
@@ -167,21 +126,18 @@ const AdminDashboard = () => {
         {/* Stats Overview */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           {statsData.map((stat, index) => (
-            <Card key={index} className="border-0 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 bg-gradient-to-br from-white/90 to-orange-50/50 backdrop-blur-sm border border-orange-100">
+            <Card key={index} className="border-0 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 bg-white/90 backdrop-blur-sm">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-semibold text-gray-700">{stat.label}</p>
-                    <div className="flex items-center mt-2">
-                      <p className="text-3xl font-extrabold bg-gradient-to-r from-orange-600 to-amber-600 bg-clip-text text-transparent">
-                        {stat.value}
-                      </p>
-                      <span className={`ml-2 text-xs font-semibold px-2 py-1 rounded-full ${stat.change.startsWith('+') ? 'text-green-700 bg-green-100' : 'text-red-700 bg-red-100'}`}>
-                        {stat.change}
-                      </span>
-                    </div>
+                    <p className="text-sm font-medium text-gray-600 mb-1">{stat.label}</p>
+                    <p className="text-3xl font-bold text-gray-900">{stat.value}</p>
+                    <p className="text-sm text-gray-500 flex items-center mt-1">
+                      <TrendingUp className="h-3 w-3 mr-1" />
+                      {stat.change}
+                    </p>
                   </div>
-                  <div className={`${stat.color} p-3 rounded-2xl bg-gradient-to-br from-orange-100 to-amber-100 shadow-lg`}>
+                  <div className={`p-3 rounded-xl bg-gradient-to-r ${stat.color} text-white shadow-lg`}>
                     {stat.icon}
                   </div>
                 </div>
@@ -204,132 +160,84 @@ const AdminDashboard = () => {
               </TabsList>
 
               <TabsContent value="overview" className="space-y-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center">
-                      <BarChart3 className="h-5 w-5 mr-2" />
-                      System Overview
-                    </CardTitle>
-                    <CardDescription>
-                      Real-time statistics and performance metrics
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      <div className="flex justify-between items-center py-2">
-                        <span className="text-sm text-gray-600">Teacher Placement Rate</span>
-                        <div className="flex items-center">
-                          <div className="w-32 bg-gray-200 rounded-full h-2 mr-2">
-                            <div className="bg-green-600 h-2 rounded-full" style={{ width: '73%' }}></div>
+                <AdminActionButtons />
+
+                <div className="grid lg:grid-cols-2 gap-6">
+                  {/* Recent Activity */}
+                  <Card className="bg-gradient-to-br from-white/90 to-blue-50/50 backdrop-blur-sm border border-blue-100 shadow-xl">
+                    <CardHeader>
+                      <CardTitle className="flex items-center text-blue-900">
+                        <Activity className="h-5 w-5 mr-2" />
+                        Real-time Activity
+                      </CardTitle>
+                      <CardDescription>Live platform activities and updates</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        {recentActivity.map((activity, index) => (
+                          <div key={index} className="flex items-center justify-between p-3 rounded-lg bg-white/60 backdrop-blur-sm border border-white/20 hover:bg-white/80 transition-all duration-200">
+                            <div className="flex items-center space-x-3">
+                              <div className={`w-3 h-3 rounded-full ${getStatusColor(activity.status).split(' ')[0]} animate-pulse`}></div>
+                              <div>
+                                <p className="font-medium text-gray-900">{activity.type}</p>
+                                <p className="text-sm text-gray-600">{activity.name}</p>
+                              </div>
+                            </div>
+                            <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">{activity.time}</span>
                           </div>
-                          <span className="text-sm font-medium">73%</span>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Performance Metrics */}
+                  <Card className="bg-gradient-to-br from-white/90 to-purple-50/50 backdrop-blur-sm border border-purple-100 shadow-xl">
+                    <CardHeader>
+                      <CardTitle className="flex items-center text-purple-900">
+                        <TrendingUp className="h-5 w-5 mr-2" />
+                        Performance Metrics
+                      </CardTitle>
+                      <CardDescription>Key performance indicators</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-medium text-gray-700">Teacher Placement Rate</span>
+                          <span className="text-sm font-bold text-green-600">73%</span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                          <div className="bg-gradient-to-r from-green-500 to-emerald-500 h-2 rounded-full w-[73%]"></div>
                         </div>
                       </div>
-                      <div className="flex justify-between items-center py-2">
-                        <span className="text-sm text-gray-600">Account Renewal Rate</span>
-                        <div className="flex items-center">
-                          <div className="w-32 bg-gray-200 rounded-full h-2 mr-2">
-                            <div className="bg-blue-600 h-2 rounded-full" style={{ width: '85%' }}></div>
-                          </div>
-                          <span className="text-sm font-medium">85%</span>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-medium text-gray-700">Account Renewal Rate</span>
+                          <span className="text-sm font-bold text-blue-600">85%</span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                          <div className="bg-gradient-to-r from-blue-500 to-cyan-500 h-2 rounded-full w-[85%]"></div>
                         </div>
                       </div>
-                      <div className="flex justify-between items-center py-2">
-                        <span className="text-sm text-gray-600">School Satisfaction</span>
-                        <div className="flex items-center">
-                          <div className="w-32 bg-gray-200 rounded-full h-2 mr-2">
-                            <div className="bg-purple-600 h-2 rounded-full" style={{ width: '92%' }}></div>
-                          </div>
-                          <span className="text-sm font-medium">92%</span>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-medium text-gray-700">School Satisfaction</span>
+                          <span className="text-sm font-bold text-purple-600">92%</span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                          <div className="bg-gradient-to-r from-purple-500 to-pink-500 h-2 rounded-full w-[92%]"></div>
                         </div>
                       </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                    </CardContent>
+                  </Card>
+                </div>
               </TabsContent>
 
               <TabsContent value="teachers" className="space-y-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Teacher Management</CardTitle>
-                    <CardDescription>
-                      Manage teacher profiles, account status, and placements
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      {teachers.map((teacher) => (
-                        <div key={teacher.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                          <div className="flex items-center space-x-4">
-                            <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-teal-600 rounded-full flex items-center justify-center text-white font-semibold">
-                              {teacher.full_name.split(' ').map(n => n[0]).join('')}
-                            </div>
-                            <div>
-                              <h4 className="font-medium text-gray-900">{teacher.full_name}</h4>
-                              <p className="text-sm text-gray-600">{teacher.subject_specialization} • {teacher.experience_years} years</p>
-                            </div>
-                          </div>
-                          <div className="flex items-center space-x-4">
-                            <div className="flex items-center space-x-2">
-                              <Eye className="h-4 w-4 text-gray-400" />
-                              <span className="text-sm text-gray-600">{teacher.views_count}</span>
-                            </div>
-                            <Badge className={getStatusColor(teacher.status)}>
-                              {teacher.status}
-                            </Badge>
-                            <span className="text-sm text-gray-600">
-                              {getDaysUntilExpiry(teacher.account_expiry)} days
-                            </span>
-                            <Link to={`/teacher-profile/${teacher.id}`}>
-                              <Button size="sm" variant="outline">
-                                Manage
-                              </Button>
-                            </Link>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
+                <RealTimeTeachersDisplay />
               </TabsContent>
 
               <TabsContent value="schools" className="space-y-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>School Management</CardTitle>
-                    <CardDescription>
-                      Monitor school accounts and active job postings
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      {schools.map((school) => (
-                        <div key={school.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                          <div className="flex items-center space-x-4">
-                            <div className="w-10 h-10 bg-gradient-to-r from-green-600 to-blue-600 rounded-full flex items-center justify-center text-white font-semibold">
-                              {school.school_name.split(' ').map(n => n[0]).join('').slice(0, 2)}
-                            </div>
-                            <div>
-                              <h4 className="font-medium text-gray-900">{school.school_name}</h4>
-                              <p className="text-sm text-gray-600">{school.school_type} • {school.total_teachers} teachers</p>
-                            </div>
-                          </div>
-                          <div className="flex items-center space-x-4">
-                            <Badge className="bg-blue-100 text-blue-800">
-                              {school.active_jobs} jobs
-                            </Badge>
-                            <span className="text-sm text-gray-600">Joined {new Date(school.created_at).toLocaleDateString()}</span>
-                            <Link to={`/school-profile/${school.id}`}>
-                              <Button size="sm" variant="outline">
-                                View Details
-                              </Button>
-                            </Link>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
+                <RealTimeSchoolsDisplay />
               </TabsContent>
 
               <TabsContent value="applications" className="space-y-6">

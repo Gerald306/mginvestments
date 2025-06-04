@@ -10,7 +10,6 @@ import { supabase } from '@/integrations/supabase/client';
 import TeacherCard from '@/components/TeacherCard';
 import ContactForm from '@/components/ContactForm';
 import Testimonials from '@/components/Testimonials';
-import BlogNews from '@/components/BlogNews';
 
 const Index = () => {
   const { user, profile, signOut } = useAuth();
@@ -382,8 +381,7 @@ const Index = () => {
       {/* Testimonials Section */}
       <Testimonials />
 
-      {/* Blog/News Section */}
-      <BlogNews />
+      {/* Blog/News Section removed as requested */}
 
       {/* Contact Form Section */}
       <ContactForm />

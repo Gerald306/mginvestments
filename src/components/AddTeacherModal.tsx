@@ -9,7 +9,7 @@ import { UserPlus, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface AddTeacherModalProps {
-  onTeacherAdded?: () => void;
+  onTeacherAdded?: (teacher: any) => void;
 }
 
 const AddTeacherModal: React.FC<AddTeacherModalProps> = ({ onTeacherAdded }) => {
@@ -141,7 +141,7 @@ const AddTeacherModal: React.FC<AddTeacherModalProps> = ({ onTeacherAdded }) => 
       });
       
       if (onTeacherAdded) {
-        onTeacherAdded();
+        onTeacherAdded(formData);
       }
     } catch (error) {
       toast({

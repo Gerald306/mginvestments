@@ -9,7 +9,7 @@ import { School, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface AddSchoolModalProps {
-  onSchoolAdded?: () => void;
+  onSchoolAdded?: (school: any) => void;
 }
 
 const AddSchoolModal: React.FC<AddSchoolModalProps> = ({ onSchoolAdded }) => {
@@ -72,7 +72,7 @@ const AddSchoolModal: React.FC<AddSchoolModalProps> = ({ onSchoolAdded }) => {
       });
       
       if (onSchoolAdded) {
-        onSchoolAdded();
+        onSchoolAdded(formData);
       }
     } catch (error) {
       toast({
