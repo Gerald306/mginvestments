@@ -10,6 +10,9 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import AddTeacherModal from '@/components/AddTeacherModal';
 import AddSchoolModal from '@/components/AddSchoolModal';
+import ApplicationsManagement from '@/components/ApplicationsManagement';
+import NotificationSystem from '@/components/NotificationSystem';
+import FileUploadManager from '@/components/FileUploadManager';
 
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
@@ -191,10 +194,13 @@ const AdminDashboard = () => {
           {/* Main Content */}
           <div className="lg:col-span-2">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-              <TabsList className="grid w-full grid-cols-3">
+              <TabsList className="grid w-full grid-cols-6">
                 <TabsTrigger value="overview">Overview</TabsTrigger>
                 <TabsTrigger value="teachers">Teachers</TabsTrigger>
                 <TabsTrigger value="schools">Schools</TabsTrigger>
+                <TabsTrigger value="applications">Applications</TabsTrigger>
+                <TabsTrigger value="notifications">Notifications</TabsTrigger>
+                <TabsTrigger value="files">Files</TabsTrigger>
               </TabsList>
 
               <TabsContent value="overview" className="space-y-6">
@@ -324,6 +330,18 @@ const AdminDashboard = () => {
                     </div>
                   </CardContent>
                 </Card>
+              </TabsContent>
+
+              <TabsContent value="applications" className="space-y-6">
+                <ApplicationsManagement />
+              </TabsContent>
+
+              <TabsContent value="notifications" className="space-y-6">
+                <NotificationSystem />
+              </TabsContent>
+
+              <TabsContent value="files" className="space-y-6">
+                <FileUploadManager />
               </TabsContent>
             </Tabs>
           </div>

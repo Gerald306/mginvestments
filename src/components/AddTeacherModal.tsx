@@ -28,7 +28,16 @@ const AddTeacherModal: React.FC<AddTeacherModalProps> = ({ onTeacherAdded }) => 
     location: '',
     teaching_levels: [] as string[],
     detailed_experience: '',
-    salary_expectation: ''
+    salary_expectation: '',
+    profile_image: '',
+    cv_document: '',
+    certifications: [] as string[],
+    languages: [] as string[],
+    availability: 'full-time',
+    preferred_location: '',
+    emergency_contact: '',
+    national_id: '',
+    references: ''
   });
 
   const educationLevels = [
@@ -61,7 +70,36 @@ const AddTeacherModal: React.FC<AddTeacherModalProps> = ({ onTeacherAdded }) => 
     'Computer Science',
     'Art',
     'Music',
-    'Physical Education'
+    'Physical Education',
+    'French',
+    'Kiswahili',
+    'Religious Education',
+    'Agriculture',
+    'Technical Drawing',
+    'Home Economics',
+    'Business Studies',
+    'Economics',
+    'Entrepreneurship'
+  ];
+
+  const languages = [
+    'English',
+    'Luganda',
+    'Kiswahili',
+    'French',
+    'Arabic',
+    'Runyankole',
+    'Luo',
+    'Ateso',
+    'Lugbara'
+  ];
+
+  const availabilityOptions = [
+    'full-time',
+    'part-time',
+    'contract',
+    'substitute',
+    'weekend-only'
   ];
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -90,7 +128,16 @@ const AddTeacherModal: React.FC<AddTeacherModalProps> = ({ onTeacherAdded }) => 
         location: '',
         teaching_levels: [],
         detailed_experience: '',
-        salary_expectation: ''
+        salary_expectation: '',
+        profile_image: '',
+        cv_document: '',
+        certifications: [],
+        languages: [],
+        availability: 'full-time',
+        preferred_location: '',
+        emergency_contact: '',
+        national_id: '',
+        references: ''
       });
       
       if (onTeacherAdded) {

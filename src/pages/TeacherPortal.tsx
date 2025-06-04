@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { GraduationCap, MapPin, Phone, DollarSign, Calendar, Eye, Star, Building2, Clock } from "lucide-react";
 import { Link } from "react-router-dom";
+import JobPostings from '@/components/JobPostings';
 
 const TeacherPortal = () => {
   const [formData, setFormData] = useState({
@@ -284,82 +285,7 @@ const TeacherPortal = () => {
           </TabsContent>
 
           <TabsContent value="jobs" className="space-y-6">
-            <div className="flex justify-between items-center">
-              <h2 className="text-xl font-semibold text-gray-900">Available Positions</h2>
-              <div className="flex items-center space-x-4">
-                <Select>
-                  <SelectTrigger className="w-40">
-                    <SelectValue placeholder="Filter by subject" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Subjects</SelectItem>
-                    <SelectItem value="mathematics">Mathematics</SelectItem>
-                    <SelectItem value="physics">Physics</SelectItem>
-                    <SelectItem value="chemistry">Chemistry</SelectItem>
-                    <SelectItem value="english">English</SelectItem>
-                  </SelectContent>
-                </Select>
-                <Select>
-                  <SelectTrigger className="w-40">
-                    <SelectValue placeholder="Filter by location" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Locations</SelectItem>
-                    <SelectItem value="kampala">Kampala</SelectItem>
-                    <SelectItem value="entebbe">Entebbe</SelectItem>
-                    <SelectItem value="mukono">Mukono</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <div className="grid gap-6">
-              {jobListings.map((job) => (
-                <Card key={job.id} className="hover:shadow-md transition-shadow">
-                  <CardContent className="p-6">
-                    <div className="flex justify-between items-start mb-4">
-                      <div className="flex-1">
-                        <div className="flex items-center space-x-2 mb-2">
-                          <h3 className="text-lg font-semibold text-gray-900">{job.position}</h3>
-                          {job.urgent && (
-                            <Badge className="bg-red-100 text-red-800">Urgent</Badge>
-                          )}
-                        </div>
-                        <div className="flex items-center space-x-4 text-sm text-gray-600 mb-3">
-                          <div className="flex items-center">
-                            <Building2 className="h-4 w-4 mr-1" />
-                            {job.school}
-                          </div>
-                          <div className="flex items-center">
-                            <MapPin className="h-4 w-4 mr-1" />
-                            {job.location}
-                          </div>
-                          <div className="flex items-center">
-                            <DollarSign className="h-4 w-4 mr-1" />
-                            {job.salary}
-                          </div>
-                        </div>
-                        <div className="flex items-center space-x-4 text-sm text-gray-500">
-                          <span>{job.type} Level</span>
-                          <span>•</span>
-                          <span>Posted {job.posted}</span>
-                          <span>•</span>
-                          <span>{job.applicants} applicants</span>
-                        </div>
-                      </div>
-                      <div className="flex space-x-2">
-                        <Button variant="outline" size="sm">
-                          View Details
-                        </Button>
-                        <Button size="sm" className="bg-gradient-to-r from-blue-600 to-teal-600">
-                          Apply Now
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+            <JobPostings />
           </TabsContent>
 
           <TabsContent value="applications" className="space-y-6">

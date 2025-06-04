@@ -8,6 +8,9 @@ import { Link } from "react-router-dom";
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import TeacherCard from '@/components/TeacherCard';
+import ContactForm from '@/components/ContactForm';
+import Testimonials from '@/components/Testimonials';
+import BlogNews from '@/components/BlogNews';
 
 const Index = () => {
   const { user, profile, signOut } = useAuth();
@@ -375,6 +378,15 @@ const Index = () => {
           </div>
         </div>
       </section>
+
+      {/* Testimonials Section */}
+      <Testimonials />
+
+      {/* Blog/News Section */}
+      <BlogNews />
+
+      {/* Contact Form Section */}
+      <ContactForm />
 
       {/* Footer */}
       <footer className="bg-gray-900 text-white py-12">
