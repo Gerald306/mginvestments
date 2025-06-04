@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { createDefaultAdmin } from '@/utils/createAdminUser';
+import { seedDatabase } from '@/utils/seedData';
 import { 
   Database, 
   CheckCircle, 
@@ -20,6 +21,7 @@ const DatabaseTest = () => {
   const [adminExists, setAdminExists] = useState<boolean | null>(null);
   const [testResults, setTestResults] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const [hasData, setHasData] = useState<boolean | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -82,17 +84,17 @@ const DatabaseTest = () => {
           .from('profiles')
           .select('*')
           .eq('role', 'admin');
-        
+
         if (error) throw error;
-        
+
         const hasAdmin = adminUsers && adminUsers.length > 0;
         setAdminExists(hasAdmin);
-        
+
         results.push({
           test: 'Admin User Check',
           status: hasAdmin ? 'success' : 'warning',
-          message: hasAdmin 
-            ? `Found ${adminUsers.length} admin user(s)` 
+          message: hasAdmin
+            ? `Found ${adminUsers.length} admin user(s)`
             : 'No admin users found',
           data: adminUsers
         });
@@ -101,6 +103,35 @@ const DatabaseTest = () => {
           test: 'Admin User Check',
           status: 'error',
           message: `Admin check error: ${error}`,
+          error
+        });
+      }
+
+      // Test 5: Check for sample data
+      try {
+        const { data: teachers, error } = await supabase
+          .from('teachers')
+          .select('*')
+          .limit(1);
+
+        if (error) throw error;
+
+        const hasTeachers = teachers && teachers.length > 0;
+        setHasData(hasTeachers);
+
+        results.push({
+          test: 'Sample Data Check',
+          status: hasTeachers ? 'success' : 'warning',
+          message: hasTeachers
+            ? 'Sample data found in database'
+            : 'No sample data found',
+          data: teachers
+        });
+      } catch (error) {
+        results.push({
+          test: 'Sample Data Check',
+          status: 'error',
+          message: `Data check error: ${error}`,
           error
         });
       }
@@ -118,6 +149,33 @@ const DatabaseTest = () => {
     }
 
     setTestResults(results);
+    setLoading(false);
+  };
+
+  const seedDatabaseHandler = async () => {
+    setLoading(true);
+    try {
+      const result = await seedDatabase();
+
+      if (result.success) {
+        toast({
+          title: "Database Seeded",
+          description: `Sample data added successfully! ${result.data?.teachers} teachers, ${result.data?.schools} schools, ${result.data?.applications} applications`,
+        });
+
+        // Refresh the test
+        await testDatabaseConnection();
+      } else {
+        throw new Error(result.error || result.message);
+      }
+
+    } catch (error: any) {
+      toast({
+        title: "Error Seeding Database",
+        description: error.message || "Failed to seed database",
+        variant: "destructive",
+      });
+    }
     setLoading(false);
   };
 
@@ -271,6 +329,56 @@ const DatabaseTest = () => {
                 <strong>Default Admin Credentials:</strong><br />
                 Email: admin@mginvestments.ug<br />
                 Password: Admin123!@#
+              </div>
+            </div>
+          )}
+
+          {/* Sample Data Section */}
+          {hasData === false && (
+            <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <div className="flex items-center space-x-2 mb-3">
+                <Database className="h-5 w-5 text-blue-600" />
+                <span className="font-medium text-blue-800">No Sample Data Found</span>
+              </div>
+              <p className="text-sm text-blue-700 mb-3">
+                Your database is empty. Add sample data to see teachers, schools, and applications in your app.
+              </p>
+              <Button
+                onClick={seedDatabaseHandler}
+                disabled={loading}
+                className="bg-blue-600 hover:bg-blue-700"
+              >
+                {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Database className="h-4 w-4 mr-2" />}
+                Add Sample Data
+              </Button>
+            </div>
+          )}
+
+          {hasData === true && (
+            <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+              <div className="flex items-center space-x-2 mb-3">
+                <CheckCircle className="h-5 w-5 text-green-600" />
+                <span className="font-medium text-green-800">Sample Data Available</span>
+              </div>
+              <p className="text-sm text-green-700 mb-3">
+                Your database contains sample data. You can now view teachers, schools, and applications in your app.
+              </p>
+              <div className="flex space-x-2">
+                <Button
+                  onClick={() => window.open('/', '_blank')}
+                  size="sm"
+                  className="bg-green-600 hover:bg-green-700"
+                >
+                  View Homepage
+                </Button>
+                <Button
+                  onClick={() => window.open('/teacher-portal', '_blank')}
+                  size="sm"
+                  variant="outline"
+                  className="border-green-300 text-green-700 hover:bg-green-50"
+                >
+                  Teacher Portal
+                </Button>
               </div>
             </div>
           )}

@@ -6,17 +6,18 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowRight, BookOpen, Users, Printer, Palette, Scissors, Phone, Mail, MapPin, Star, CheckCircle, UserPlus } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
+import { dataService, Teacher, Stats } from '@/services/dataService';
 import TeacherCard from '@/components/TeacherCard';
 import Testimonials from '@/components/Testimonials';
 
 const Index = () => {
   const { user, profile, signOut } = useAuth();
-  const [featuredTeachers, setFeaturedTeachers] = useState([]);
-  const [stats, setStats] = useState({
+  const [featuredTeachers, setFeaturedTeachers] = useState<Teacher[]>([]);
+  const [stats, setStats] = useState<Stats>({
     totalTeachers: 0,
     activeSchools: 0,
-    placements: 0
+    totalApplications: 0,
+    successfulPlacements: 0
   });
 
   useEffect(() => {
@@ -26,15 +27,13 @@ const Index = () => {
 
   const fetchFeaturedTeachers = async () => {
     try {
-      const { data, error } = await supabase
-        .from('teachers')
-        .select('*')
-        .eq('is_active', true)
-        .gte('account_expiry', new Date().toISOString().split('T')[0])
-        .order('views_count', { ascending: false })
-        .limit(6);
+      const { data, error } = await dataService.getFeaturedTeachers();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching teachers:', error);
+        return;
+      }
+
       setFeaturedTeachers(data || []);
     } catch (error) {
       console.error('Error fetching teachers:', error);
@@ -43,16 +42,16 @@ const Index = () => {
 
   const fetchStats = async () => {
     try {
-      const [teachersResult, schoolsResult] = await Promise.all([
-        supabase.from('teachers').select('*', { count: 'exact' }).eq('is_active', true),
-        supabase.from('schools').select('*', { count: 'exact' })
-      ]);
+      const { data, error } = await dataService.getStats();
 
-      setStats({
-        totalTeachers: teachersResult.count || 0,
-        activeSchools: schoolsResult.count || 0,
-        placements: Math.floor((teachersResult.count || 0) * 0.65) // Estimated placements
-      });
+      if (error) {
+        console.error('Error fetching stats:', error);
+        return;
+      }
+
+      if (data) {
+        setStats(data);
+      }
     } catch (error) {
       console.error('Error fetching stats:', error);
     }
@@ -118,7 +117,7 @@ const Index = () => {
                 <span className="text-2xl font-bold bg-gradient-to-r from-blue-700 via-purple-600 to-teal-600 bg-clip-text text-transparent">
                   MG Investments
                 </span>
-                <p className="text-xs text-gray-600 font-medium">Educational Excellence</p>
+                <p className="text-xs text-gray-600 font-medium">Education Services</p>
               </div>
             </div>
 
@@ -186,7 +185,7 @@ const Index = () => {
 
         <div className="relative container mx-auto px-6 text-center">
           <Badge className="mb-8 bg-gradient-to-r from-blue-100 to-teal-100 text-blue-800 border-blue-200 px-6 py-2 text-sm font-semibold shadow-lg">
-            🎓 Educational Excellence & Innovation
+            🎓 Welcome to MG Education Services
           </Badge>
           <h1 className="text-5xl md:text-7xl font-extrabold mb-8 leading-tight">
             <span className="text-gray-900">Empowering Education</span>
@@ -241,7 +240,7 @@ const Index = () => {
             <div className="text-center group">
               <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 border border-purple-100">
                 <div className="text-5xl font-extrabold bg-gradient-to-r from-purple-600 to-purple-800 bg-clip-text text-transparent mb-2">
-                  {stats.placements}+
+                  {stats.successfulPlacements}+
                 </div>
                 <div className="text-gray-700 font-semibold text-lg">Successful Placements</div>
                 <div className="w-16 h-1 bg-gradient-to-r from-purple-400 to-purple-600 mx-auto mt-3 rounded-full"></div>
