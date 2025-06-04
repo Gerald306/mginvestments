@@ -136,7 +136,9 @@ const DatabaseTest = () => {
         });
       }
 
-      setConnectionStatus('connected');
+      // Check if we have any errors
+      const hasErrors = results.some(result => result.status === 'error');
+      setConnectionStatus(hasErrors ? 'failed' : 'connected');
       
     } catch (error) {
       setConnectionStatus('failed');
@@ -333,8 +335,60 @@ const DatabaseTest = () => {
             </div>
           )}
 
+          {/* Firebase Permission Error Help */}
+          {connectionStatus === 'failed' && (
+            <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+              <div className="flex items-center space-x-2 mb-3">
+                <XCircle className="h-5 w-5 text-red-600" />
+                <span className="font-medium text-red-800">Firebase Permission Issues Detected</span>
+              </div>
+              <p className="text-sm text-red-700 mb-3">
+                Your Firebase database has permission restrictions. Here's how to fix it:
+              </p>
+              <div className="space-y-2 text-sm text-red-700 mb-4">
+                <div className="font-medium">Quick Fix (Development):</div>
+                <ol className="list-decimal list-inside space-y-1 ml-4">
+                  <li>Go to <a href="https://console.firebase.google.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">Firebase Console</a></li>
+                  <li>Select your project</li>
+                  <li>Go to Firestore Database → Rules</li>
+                  <li>Replace the rules with:</li>
+                </ol>
+                <div className="bg-gray-800 text-green-400 p-3 rounded text-xs font-mono mt-2">
+                  {`rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if true;
+    }
+  }
+}`}
+                </div>
+                <div className="text-xs text-red-600 mt-2">
+                  ⚠️ This allows public access. Use only for development!
+                </div>
+              </div>
+              <div className="flex space-x-2">
+                <Button
+                  onClick={() => window.open('https://console.firebase.google.com/', '_blank')}
+                  size="sm"
+                  className="bg-red-600 hover:bg-red-700"
+                >
+                  Open Firebase Console
+                </Button>
+                <Button
+                  onClick={testDatabaseConnection}
+                  size="sm"
+                  variant="outline"
+                  className="border-red-300 text-red-700 hover:bg-red-50"
+                >
+                  Test Again
+                </Button>
+              </div>
+            </div>
+          )}
+
           {/* Sample Data Section */}
-          {hasData === false && (
+          {hasData === false && connectionStatus === 'connected' && (
             <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
               <div className="flex items-center space-x-2 mb-3">
                 <Database className="h-5 w-5 text-blue-600" />
