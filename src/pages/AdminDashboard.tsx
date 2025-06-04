@@ -17,6 +17,8 @@ import FileUploadManager from '@/components/FileUploadManager';
 import AdminActionButtons from '@/components/AdminActionButtons';
 import RealTimeTeachersDisplay from '@/components/RealTimeTeachersDisplay';
 import RealTimeSchoolsDisplay from '@/components/RealTimeSchoolsDisplay';
+import AdminDataImport from '@/components/AdminDataImport';
+import DataApprovalWorkflow from '@/components/DataApprovalWorkflow';
 
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
@@ -150,13 +152,15 @@ const AdminDashboard = () => {
           {/* Main Content */}
           <div className="lg:col-span-2">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-              <TabsList className="grid w-full grid-cols-6">
+              <TabsList className="grid w-full grid-cols-8">
                 <TabsTrigger value="overview">Overview</TabsTrigger>
                 <TabsTrigger value="teachers">Teachers</TabsTrigger>
                 <TabsTrigger value="schools">Schools</TabsTrigger>
                 <TabsTrigger value="applications">Applications</TabsTrigger>
                 <TabsTrigger value="notifications">Notifications</TabsTrigger>
                 <TabsTrigger value="files">Files</TabsTrigger>
+                <TabsTrigger value="data-import">Data Import</TabsTrigger>
+                <TabsTrigger value="approvals">Approvals</TabsTrigger>
               </TabsList>
 
               <TabsContent value="overview" className="space-y-6">
@@ -250,6 +254,14 @@ const AdminDashboard = () => {
 
               <TabsContent value="files" className="space-y-6">
                 <FileUploadManager />
+              </TabsContent>
+
+              <TabsContent value="data-import" className="space-y-6">
+                <AdminDataImport />
+              </TabsContent>
+
+              <TabsContent value="approvals" className="space-y-6">
+                <DataApprovalWorkflow />
               </TabsContent>
             </Tabs>
           </div>

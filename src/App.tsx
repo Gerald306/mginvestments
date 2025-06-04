@@ -43,13 +43,13 @@ const App = () => (
                 </ProtectedRoute>
               } 
             />
-            <Route 
-              path="/teacher-portal" 
+            <Route
+              path="/teacher-portal"
               element={
-                <ProtectedRoute allowedRoles={['teacher']}>
+                <ProtectedRoute allowedRoles={['teacher', 'admin']}>
                   <TeacherPortal />
                 </ProtectedRoute>
-              } 
+              }
             />
             <Route 
               path="/school-portal" 

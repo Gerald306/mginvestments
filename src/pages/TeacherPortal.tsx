@@ -8,11 +8,17 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { GraduationCap, MapPin, Phone, DollarSign, Calendar, Eye, Star, Building2, Clock } from "lucide-react";
+import { GraduationCap, MapPin, Phone, DollarSign, Calendar, Eye, Star, Building2, Clock, Shield, Database, CheckCircle } from "lucide-react";
 import { Link } from "react-router-dom";
 import JobPostings from '@/components/JobPostings';
+import { useAuth } from '@/contexts/AuthContext';
+import AdminDataImport from '@/components/AdminDataImport';
+import DataApprovalWorkflow from '@/components/DataApprovalWorkflow';
 
 const TeacherPortal = () => {
+  const { profile } = useAuth();
+  const isAdmin = profile?.role === 'admin';
+
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -73,8 +79,18 @@ const TeacherPortal = () => {
         <div className="px-6 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Teacher Portal</h1>
-              <p className="text-gray-600">Find your next teaching opportunity</p>
+              <div className="flex items-center space-x-3">
+                <h1 className="text-2xl font-bold text-gray-900">Teacher Portal</h1>
+                {isAdmin && (
+                  <Badge className="bg-red-100 text-red-800 border-red-200">
+                    <Shield className="h-3 w-3 mr-1" />
+                    Admin Access
+                  </Badge>
+                )}
+              </div>
+              <p className="text-gray-600">
+                {isAdmin ? 'Admin access to teacher portal with data management capabilities' : 'Find your next teaching opportunity'}
+              </p>
             </div>
             <div className="flex items-center space-x-4">
               <Link to="/">
@@ -91,10 +107,22 @@ const TeacherPortal = () => {
 
       <div className="p-6">
         <Tabs defaultValue="profile" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className={`grid w-full ${isAdmin ? 'grid-cols-5' : 'grid-cols-3'}`}>
             <TabsTrigger value="profile">My Profile</TabsTrigger>
             <TabsTrigger value="jobs">Available Jobs</TabsTrigger>
             <TabsTrigger value="applications">My Applications</TabsTrigger>
+            {isAdmin && (
+              <>
+                <TabsTrigger value="data-import" className="text-red-700">
+                  <Database className="h-4 w-4 mr-1" />
+                  Data Import
+                </TabsTrigger>
+                <TabsTrigger value="approvals" className="text-red-700">
+                  <CheckCircle className="h-4 w-4 mr-1" />
+                  Approvals
+                </TabsTrigger>
+              </>
+            )}
           </TabsList>
 
           <TabsContent value="profile" className="space-y-6">
@@ -308,6 +336,19 @@ const TeacherPortal = () => {
               </CardContent>
             </Card>
           </TabsContent>
+
+          {/* Admin-only tabs */}
+          {isAdmin && (
+            <>
+              <TabsContent value="data-import" className="space-y-6">
+                <AdminDataImport />
+              </TabsContent>
+
+              <TabsContent value="approvals" className="space-y-6">
+                <DataApprovalWorkflow />
+              </TabsContent>
+            </>
+          )}
         </Tabs>
       </div>
     </div>
