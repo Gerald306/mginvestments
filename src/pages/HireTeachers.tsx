@@ -42,6 +42,7 @@ const HireTeachers = () => {
         .from('teachers')
         .select('*')
         .eq('is_active', true)
+        .eq('status', 'approved')
         .gte('account_expiry', new Date().toISOString().split('T')[0])
         .order('created_at', { ascending: false });
 

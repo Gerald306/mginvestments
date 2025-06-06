@@ -304,14 +304,17 @@ const FileUploadManager: React.FC = () => {
       <div className="grid gap-4">
         {filteredFiles.map((file) => (
           <Card key={file.id} className="hover:shadow-lg transition-shadow duration-300">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-4 flex-1">
-                  {getFileIcon(file.type)}
+            <CardContent className="p-4 sm:p-6">
+              <div className="space-y-4">
+                {/* File Info Section - Mobile optimized */}
+                <div className="flex items-start space-x-3 sm:space-x-4">
+                  <div className="flex-shrink-0">
+                    {getFileIcon(file.type)}
+                  </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-gray-900 truncate">{file.name}</h3>
-                    <p className="text-sm text-gray-600 truncate">{file.description}</p>
-                    <div className="flex items-center space-x-4 mt-2 text-xs text-gray-500">
+                    <h3 className="font-semibold text-gray-900 text-sm sm:text-base truncate">{file.name}</h3>
+                    <p className="text-xs sm:text-sm text-gray-600 truncate">{file.description}</p>
+                    <div className="flex flex-wrap items-center gap-2 mt-2 text-xs text-gray-500">
                       <span>{formatFileSize(file.size)}</span>
                       <span>•</span>
                       <span className="capitalize">{file.category}</span>
@@ -319,38 +322,44 @@ const FileUploadManager: React.FC = () => {
                       <span>{file.uploadDate}</span>
                     </div>
                   </div>
-                </div>
-                
-                <div className="flex items-center space-x-2">
-                  <Badge className={file.isPublic ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}>
+                  <Badge className={`${file.isPublic ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'} flex-shrink-0 text-xs`}>
                     {file.isPublic ? 'Public' : 'Private'}
                   </Badge>
-                  
-                  <Button size="sm" variant="outline">
+                </div>
+
+                {/* Action Buttons - Mobile optimized */}
+                <div className="flex flex-col sm:flex-row gap-2 sm:gap-2 pt-3 border-t border-gray-100">
+                  <Button size="sm" variant="outline" className="w-full sm:w-auto">
                     <Eye className="h-4 w-4 mr-1" />
-                    View
+                    <span className="hidden sm:inline">View</span>
+                    <span className="sm:hidden">View</span>
                   </Button>
-                  
-                  <Button size="sm" variant="outline">
+
+                  <Button size="sm" variant="outline" className="w-full sm:w-auto">
                     <Download className="h-4 w-4 mr-1" />
-                    Download
+                    <span className="hidden sm:inline">Download</span>
+                    <span className="sm:hidden">Download</span>
                   </Button>
-                  
-                  <Button 
-                    size="sm" 
+
+                  <Button
+                    size="sm"
                     variant="outline"
                     onClick={() => toggleFileVisibility(file.id)}
+                    className="w-full sm:w-auto"
                   >
-                    {file.isPublic ? 'Make Private' : 'Make Public'}
+                    <span className="hidden sm:inline">{file.isPublic ? 'Make Private' : 'Make Public'}</span>
+                    <span className="sm:hidden">{file.isPublic ? 'Private' : 'Public'}</span>
                   </Button>
-                  
-                  <Button 
-                    size="sm" 
+
+                  <Button
+                    size="sm"
                     variant="outline"
                     onClick={() => handleDeleteFile(file.id)}
-                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                    className="w-full sm:w-auto text-red-600 hover:text-red-700 hover:bg-red-50"
                   >
-                    <Trash2 className="h-4 w-4" />
+                    <Trash2 className="h-4 w-4 mr-1" />
+                    <span className="hidden sm:inline">Delete</span>
+                    <span className="sm:hidden">Delete</span>
                   </Button>
                 </div>
               </div>

@@ -331,64 +331,84 @@ const NotificationSystem: React.FC = () => {
               !notification.read ? 'border-l-4 border-l-orange-500 bg-orange-50/30' : ''
             } ${notification.urgent ? 'ring-2 ring-red-200' : ''}`}
           >
-            <CardContent className="p-6">
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center space-x-3 mb-2">
-                    {getTypeIcon(notification.type)}
-                    <h3 className={`font-semibold ${!notification.read ? 'text-gray-900' : 'text-gray-700'}`}>
-                      {notification.title}
-                    </h3>
-                    {notification.urgent && (
-                      <Badge className="bg-red-100 text-red-800">Urgent</Badge>
-                    )}
-                    {!notification.read && (
-                      <Badge className="bg-orange-100 text-orange-800">New</Badge>
-                    )}
+            <CardContent className="p-4 sm:p-6">
+              <div className="space-y-4">
+                {/* Header Section - Mobile optimized */}
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start space-x-3 mb-2">
+                      <div className="flex-shrink-0 mt-0.5">
+                        {getTypeIcon(notification.type)}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className={`font-semibold text-sm sm:text-base ${!notification.read ? 'text-gray-900' : 'text-gray-700'} truncate`}>
+                          {notification.title}
+                        </h3>
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          {notification.urgent && (
+                            <Badge className="bg-red-100 text-red-800 text-xs">Urgent</Badge>
+                          )}
+                          {!notification.read && (
+                            <Badge className="bg-orange-100 text-orange-800 text-xs">New</Badge>
+                          )}
+                          <Badge className={`${getTypeColor(notification.type)} text-xs`}>
+                            {notification.type}
+                          </Badge>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                  
-                  <p className={`mb-3 ${!notification.read ? 'text-gray-800' : 'text-gray-600'}`}>
+                </div>
+
+                {/* Message Content */}
+                <div className="pl-0 sm:pl-8">
+                  <p className={`mb-3 text-sm sm:text-base ${!notification.read ? 'text-gray-800' : 'text-gray-600'}`}>
                     {notification.message}
                   </p>
-                  
-                  <div className="flex items-center space-x-4 text-sm text-gray-500">
+                </div>
+
+                {/* Meta Information - Mobile optimized */}
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-3 border-t border-gray-100">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-xs sm:text-sm text-gray-500">
                     <div className="flex items-center">
                       {getRecipientIcon(notification.recipient_type)}
                       <span className="ml-1 capitalize">{notification.recipient_type}</span>
                     </div>
                     <div className="flex items-center">
-                      <Clock className="h-4 w-4 mr-1" />
-                      {new Date(notification.created_at).toLocaleDateString()}
+                      <Clock className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                      <span>{new Date(notification.created_at).toLocaleDateString()}</span>
                     </div>
                     <div className="flex items-center">
-                      <User className="h-4 w-4 mr-1" />
-                      {notification.sender}
+                      <User className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                      <span>{notification.sender}</span>
                     </div>
                   </div>
-                </div>
-                
-                <div className="flex items-center space-x-2 ml-4">
-                  <Badge className={getTypeColor(notification.type)}>
-                    {notification.type}
-                  </Badge>
-                  {!notification.read && (
+
+                  {/* Action Buttons - Mobile optimized */}
+                  <div className="flex flex-col sm:flex-row gap-2 sm:gap-2">
+                    {!notification.read && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => markAsRead(notification.id)}
+                        className="w-full sm:w-auto text-xs sm:text-sm"
+                      >
+                        <Eye className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                        <span className="hidden sm:inline">Mark Read</span>
+                        <span className="sm:hidden">Read</span>
+                      </Button>
+                    )}
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => markAsRead(notification.id)}
+                      onClick={() => deleteNotification(notification.id)}
+                      className="w-full sm:w-auto text-red-600 hover:text-red-700 hover:bg-red-50 text-xs sm:text-sm"
                     >
-                      <Eye className="h-4 w-4 mr-1" />
-                      Mark Read
+                      <Trash2 className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                      <span className="hidden sm:inline">Delete</span>
+                      <span className="sm:hidden">Delete</span>
                     </Button>
-                  )}
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => deleteNotification(notification.id)}
-                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                  </div>
                 </div>
               </div>
             </CardContent>

@@ -94,7 +94,7 @@ class DataService {
     }
   }
 
-  // Fetch featured teachers (top 6 by views)
+  // Fetch featured teachers (top 6 by views) - only approved
   async getFeaturedTeachers(): Promise<{ data: Teacher[] | null; error: any }> {
     try {
       const today = new Date().toISOString().split('T')[0];
@@ -102,16 +102,39 @@ class DataService {
         .from('teachers')
         .select('*')
         .eq('is_active', true)
+        .eq('status', 'approved')
         .gte('account_expiry', today)
         .order('views_count', { ascending: false })
         .limit(6);
-      
+
       return {
         data: result.data || [],
         error: result.error
       };
     } catch (error) {
       console.error('Error fetching featured teachers:', error);
+      return { data: null, error };
+    }
+  }
+
+  // Fetch approved teachers only (for public display)
+  async getApprovedTeachers(): Promise<{ data: Teacher[] | null; error: any }> {
+    try {
+      const today = new Date().toISOString().split('T')[0];
+      const result = await supabase
+        .from('teachers')
+        .select('*')
+        .eq('is_active', true)
+        .eq('status', 'approved')
+        .gte('account_expiry', today)
+        .order('views_count', { ascending: false });
+
+      return {
+        data: result.data || [],
+        error: result.error
+      };
+    } catch (error) {
+      console.error('Error fetching approved teachers:', error);
       return { data: null, error };
     }
   }
@@ -142,13 +165,33 @@ class DataService {
         .select('*')
         .eq('is_active', true)
         .order('last_activity', { ascending: false });
-      
+
       return {
         data: result.data || [],
         error: result.error
       };
     } catch (error) {
       console.error('Error fetching active schools:', error);
+      return { data: null, error };
+    }
+  }
+
+  // Fetch approved schools only (for public display)
+  async getApprovedSchools(): Promise<{ data: School[] | null; error: any }> {
+    try {
+      const result = await supabase
+        .from('schools')
+        .select('*')
+        .eq('is_active', true)
+        .eq('status', 'approved')
+        .order('last_activity', { ascending: false });
+
+      return {
+        data: result.data || [],
+        error: result.error
+      };
+    } catch (error) {
+      console.error('Error fetching approved schools:', error);
       return { data: null, error };
     }
   }

@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, BookOpen, Users, GraduationCap } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 const Auth = () => {
   const [loginData, setLoginData] = useState({ email: '', password: '' });
@@ -25,7 +26,7 @@ const Auth = () => {
 
   useEffect(() => {
     if (user) {
-      navigate('/');
+      // Don't redirect here, let handleLogin handle the redirect based on role
     }
   }, [user, navigate]);
 
@@ -34,9 +35,30 @@ const Auth = () => {
     setLoading(true);
     const { error } = await signIn(loginData.email, loginData.password);
     setLoading(false);
-    
+
     if (!error) {
-      navigate('/');
+      // Wait a moment for the profile to be loaded, then redirect based on role
+      setTimeout(async () => {
+        try {
+          const { data: { session } } = await supabase.auth.getSession();
+          if (session?.user) {
+            const { data: profileData } = await supabase.getUserProfile(session.user.uid);
+
+            if (profileData?.role === 'admin') {
+              navigate('/admin');
+            } else if (profileData?.role === 'teacher') {
+              navigate('/teacher-portal');
+            } else if (profileData?.role === 'school') {
+              navigate('/school-portal');
+            } else {
+              navigate('/');
+            }
+          }
+        } catch (error) {
+          console.error('Error fetching profile for redirect:', error);
+          navigate('/');
+        }
+      }, 1000);
     }
   };
 

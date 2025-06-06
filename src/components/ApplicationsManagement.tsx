@@ -28,6 +28,7 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Textarea } from "@/components/ui/textarea";
@@ -122,12 +123,58 @@ const ApplicationsManagement: React.FC = () => {
   ];
 
   useEffect(() => {
-    // Simulate API call
-    setTimeout(() => {
-      setApplications(mockApplications);
-      setFilteredApplications(mockApplications);
-      setLoading(false);
-    }, 1000);
+    const fetchApplications = async () => {
+      try {
+        // Fetch teacher applications from the database
+        const { data: teacherApplications, error } = await supabase
+          .from('teacher_applications')
+          .select('*')
+          .order('submitted_at', { ascending: false });
+
+        if (error) {
+          console.error('Error fetching teacher applications:', error);
+          // Fall back to mock data if table doesn't exist yet
+          setApplications(mockApplications);
+          setFilteredApplications(mockApplications);
+          setLoading(false);
+          return;
+        }
+
+        // Transform teacher applications to match the JobApplication interface
+        const transformedApplications: JobApplication[] = (teacherApplications || []).map(app => ({
+          id: app.id || app.teacher_id,
+          teacher_name: app.teacher_name,
+          teacher_email: app.teacher_email,
+          teacher_phone: app.teacher_phone || '',
+          job_title: `${app.subject_specialization} Teacher`,
+          school_name: 'General Application',
+          subject: app.subject_specialization,
+          applied_date: app.submitted_at?.split('T')[0] || new Date().toISOString().split('T')[0],
+          status: app.status as any,
+          cover_letter: app.bio || 'No cover letter provided',
+          experience_years: app.experience_years || 0,
+          education_level: app.education_level,
+          salary_expectation: app.salary_expectation || 'Not specified',
+          teacher_id: app.teacher_id,
+          job_id: 'general_application'
+        }));
+
+        // Combine with mock applications for now
+        const allApplications = [...transformedApplications, ...mockApplications];
+        setApplications(allApplications);
+        setFilteredApplications(allApplications);
+
+      } catch (error) {
+        console.error('Error in fetchApplications:', error);
+        // Fall back to mock data
+        setApplications(mockApplications);
+        setFilteredApplications(mockApplications);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchApplications();
   }, []);
 
   useEffect(() => {
@@ -170,13 +217,37 @@ const ApplicationsManagement: React.FC = () => {
 
   const handleAdminAction = async (applicationId: string, action: 'approve' | 'reject' | 'hire', notes?: string) => {
     try {
-      // Here you would typically make an API call to update the application status
       const statusMap = {
         'approve': 'approved',
         'reject': 'rejected',
         'hire': 'hired'
       };
 
+      // Update in database if it's a teacher application
+      const application = applications.find(app => app.id === applicationId);
+      if (application && application.job_id === 'general_application') {
+        const { error } = await supabase
+          .from('teacher_applications')
+          .update({
+            status: statusMap[action],
+            admin_notes: notes,
+            reviewed_by: profile?.full_name || 'Admin',
+            reviewed_at: new Date().toISOString()
+          })
+          .eq('teacher_id', application.teacher_id);
+
+        if (error) {
+          console.error('Error updating application in database:', error);
+        }
+
+        // Also update the teacher's status in the teachers table
+        await supabase
+          .from('teachers')
+          .update({ status: statusMap[action] })
+          .eq('id', application.teacher_id);
+      }
+
+      // Update local state
       setApplications(prev =>
         prev.map(app =>
           app.id === applicationId ? {
@@ -196,6 +267,7 @@ const ApplicationsManagement: React.FC = () => {
 
       setActionNotes('');
     } catch (error) {
+      console.error('Error in handleAdminAction:', error);
       toast({
         title: "Error",
         description: `Failed to ${action} application. Please try again.`,
@@ -314,67 +386,70 @@ const ApplicationsManagement: React.FC = () => {
       <div className="space-y-4">
         {filteredApplications.map((application) => (
           <Card key={application.id} className="hover:shadow-lg transition-shadow duration-300">
-            <CardHeader>
-              <div className="flex items-start justify-between">
-                <div>
-                  <CardTitle className="text-lg">{application.teacher_name}</CardTitle>
-                  <CardDescription>
+            <CardHeader className="pb-3">
+              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                <div className="flex-1 min-w-0">
+                  <CardTitle className="text-base sm:text-lg truncate">{application.teacher_name}</CardTitle>
+                  <CardDescription className="text-sm">
                     Applied for {application.job_title} at {application.school_name}
                   </CardDescription>
                 </div>
-                <Badge className={getStatusColor(application.status)}>
+                <Badge className={`${getStatusColor(application.status)} flex-shrink-0 justify-center`}>
                   {getStatusIcon(application.status)}
                   <span className="ml-1 capitalize">{application.status}</span>
                 </Badge>
               </div>
             </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-                <div className="flex items-center text-sm text-gray-600">
-                  <Mail className="h-4 w-4 mr-2" />
-                  {application.teacher_email}
+            <CardContent className="pt-0">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-4">
+                <div className="flex items-center text-sm text-gray-600 truncate">
+                  <Mail className="h-4 w-4 mr-2 flex-shrink-0" />
+                  <span className="truncate">{application.teacher_email}</span>
                 </div>
                 <div className="flex items-center text-sm text-gray-600">
-                  <Phone className="h-4 w-4 mr-2" />
-                  {application.teacher_phone}
+                  <Phone className="h-4 w-4 mr-2 flex-shrink-0" />
+                  <span>{application.teacher_phone}</span>
                 </div>
                 <div className="flex items-center text-sm text-gray-600">
-                  <Calendar className="h-4 w-4 mr-2" />
-                  {new Date(application.applied_date).toLocaleDateString()}
+                  <Calendar className="h-4 w-4 mr-2 flex-shrink-0" />
+                  <span>{new Date(application.applied_date).toLocaleDateString()}</span>
                 </div>
                 <div className="flex items-center text-sm text-gray-600">
-                  <User className="h-4 w-4 mr-2" />
-                  {application.experience_years} years exp.
+                  <User className="h-4 w-4 mr-2 flex-shrink-0" />
+                  <span>{application.experience_years} years exp.</span>
                 </div>
               </div>
 
               <div className="mb-4">
-                <h4 className="font-semibold mb-2">Cover Letter:</h4>
+                <h4 className="font-semibold mb-2 text-sm sm:text-base">Cover Letter:</h4>
                 <p className="text-sm text-gray-700 line-clamp-2">{application.cover_letter}</p>
               </div>
 
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  <Badge variant="outline">{application.education_level}</Badge>
-                  <Badge variant="outline">{application.salary_expectation}</Badge>
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div className="flex flex-wrap gap-2">
+                  <Badge variant="outline" className="text-xs">{application.education_level}</Badge>
+                  <Badge variant="outline" className="text-xs">{application.salary_expectation}</Badge>
                 </div>
-                <div className="flex items-center space-x-2">
+                <div className="flex flex-col sm:flex-row gap-2 sm:gap-2">
                   <Button
                     size="sm"
                     variant="outline"
                     onClick={() => handleViewDetails(application)}
+                    className="w-full sm:w-auto"
                   >
                     <Eye className="h-4 w-4 mr-1" />
-                    View Details
+                    <span className="hidden sm:inline">View Details</span>
+                    <span className="sm:hidden">View</span>
                   </Button>
 
                   {isAdmin && application.status === 'pending' && (
                     <>
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
-                          <Button size="sm" className="bg-green-600 hover:bg-green-700">
+                          <Button size="sm" className="bg-green-600 hover:bg-green-700 w-full sm:w-auto">
                             <CheckCircle className="h-4 w-4 mr-1" />
-                            Approve
+                            <span className="hidden sm:inline">Approve</span>
+                            <span className="sm:hidden">Approve</span>
                           </Button>
                         </AlertDialogTrigger>
                         <AlertDialogContent>
@@ -407,9 +482,10 @@ const ApplicationsManagement: React.FC = () => {
 
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
-                          <Button size="sm" variant="destructive">
+                          <Button size="sm" variant="destructive" className="w-full sm:w-auto">
                             <XCircle className="h-4 w-4 mr-1" />
-                            Reject
+                            <span className="hidden sm:inline">Reject</span>
+                            <span className="sm:hidden">Reject</span>
                           </Button>
                         </AlertDialogTrigger>
                         <AlertDialogContent>
@@ -446,9 +522,10 @@ const ApplicationsManagement: React.FC = () => {
                   {isAdmin && application.status === 'approved' && (
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
-                        <Button size="sm" className="bg-purple-600 hover:bg-purple-700">
+                        <Button size="sm" className="bg-purple-600 hover:bg-purple-700 w-full sm:w-auto">
                           <UserCheck className="h-4 w-4 mr-1" />
-                          Mark as Hired
+                          <span className="hidden sm:inline">Mark as Hired</span>
+                          <span className="sm:hidden">Hire</span>
                         </Button>
                       </AlertDialogTrigger>
                       <AlertDialogContent>

@@ -10,9 +10,10 @@ import { useToast } from "@/hooks/use-toast";
 
 interface AddTeacherModalProps {
   onTeacherAdded?: (teacher: any) => void;
+  isMobile?: boolean;
 }
 
-const AddTeacherModal: React.FC<AddTeacherModalProps> = ({ onTeacherAdded }) => {
+const AddTeacherModal: React.FC<AddTeacherModalProps> = ({ onTeacherAdded, isMobile = false }) => {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
@@ -166,9 +167,13 @@ const AddTeacherModal: React.FC<AddTeacherModalProps> = ({ onTeacherAdded }) => 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-semibold px-6 py-3 rounded-xl shadow-lg hover:shadow-orange-500/25 transition-all duration-300 transform hover:scale-105">
-          <UserPlus className="h-5 w-5 mr-2" />
-          Add Teacher
+        <Button className={`${
+          isMobile
+            ? "w-full justify-start text-sm py-3 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-medium"
+            : "bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-semibold px-6 py-3 rounded-xl shadow-lg hover:shadow-orange-500/25 transition-all duration-300 transform hover:scale-105"
+        }`}>
+          <UserPlus className="h-4 w-4 mr-2" />
+          ➕ Add Teacher
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">

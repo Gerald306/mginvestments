@@ -235,17 +235,17 @@ const TeacherPortalDataImport: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-4 sm:space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Teacher Portal Data Import</h2>
-          <p className="text-gray-600">Import and manage teacher data from the Teacher Portal</p>
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Teacher Portal Data Import</h2>
+          <p className="text-sm sm:text-base text-gray-600">Import and manage teacher data from the Teacher Portal</p>
         </div>
-        <div className="flex items-center space-x-3">
-          <Button 
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
+          <Button
             onClick={handleImportFromPortal}
             disabled={importing}
-            className="bg-blue-600 hover:bg-blue-700"
+            className="bg-blue-600 hover:bg-blue-700 w-full sm:w-auto"
           >
             {importing ? (
               <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
@@ -255,12 +255,13 @@ const TeacherPortalDataImport: React.FC = () => {
             {importing ? 'Importing...' : 'Import from Portal'}
           </Button>
           {selectedTeachers.length > 0 && (
-            <Button 
+            <Button
               onClick={handleBulkApprove}
-              className="bg-green-600 hover:bg-green-700"
+              className="bg-green-600 hover:bg-green-700 w-full sm:w-auto"
             >
               <CheckCircle className="h-4 w-4 mr-2" />
-              Approve Selected ({selectedTeachers.length})
+              <span className="hidden sm:inline">Approve Selected ({selectedTeachers.length})</span>
+              <span className="sm:hidden">Approve ({selectedTeachers.length})</span>
             </Button>
           )}
         </div>
@@ -302,9 +303,9 @@ const TeacherPortalDataImport: React.FC = () => {
         <div className="grid gap-4">
           {filteredTeachers.map((teacher) => (
             <Card key={teacher.id} className="hover:shadow-lg transition-shadow duration-300">
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center space-x-3">
+              <CardHeader className="pb-3">
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                  <div className="flex items-start space-x-3 flex-1 min-w-0">
                     <input
                       type="checkbox"
                       checked={selectedTeachers.includes(teacher.id)}
@@ -315,60 +316,63 @@ const TeacherPortalDataImport: React.FC = () => {
                           setSelectedTeachers(prev => prev.filter(id => id !== teacher.id));
                         }
                       }}
-                      className="rounded"
+                      className="rounded mt-1 flex-shrink-0"
+                      aria-label={`Select ${teacher.full_name}`}
                     />
-                    <div>
-                      <CardTitle className="text-lg">{teacher.full_name}</CardTitle>
-                      <CardDescription>{teacher.subject} Teacher • {teacher.location}</CardDescription>
+                    <div className="flex-1 min-w-0">
+                      <CardTitle className="text-base sm:text-lg truncate">{teacher.full_name}</CardTitle>
+                      <CardDescription className="text-sm">{teacher.subject} Teacher • {teacher.location}</CardDescription>
                     </div>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <Badge className={getStatusColor(teacher.status)}>
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-2 sm:flex-shrink-0">
+                    <Badge className={`${getStatusColor(teacher.status)} text-center justify-center`}>
                       {teacher.status}
                     </Badge>
-                    <Button 
-                      size="sm" 
+                    <Button
+                      size="sm"
                       variant="outline"
                       onClick={() => handleEditTeacher(teacher)}
+                      className="w-full sm:w-auto"
                     >
                       <Edit className="h-4 w-4 mr-1" />
-                      Edit
+                      <span className="hidden sm:inline">Edit</span>
+                      <span className="sm:hidden">Edit</span>
                     </Button>
                   </div>
                 </div>
               </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <CardContent className="pt-0">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                   <div className="space-y-2">
-                    <div className="flex items-center text-sm">
-                      <Mail className="h-4 w-4 mr-2 text-gray-500" />
-                      {teacher.email}
+                    <div className="flex items-center text-sm truncate">
+                      <Mail className="h-4 w-4 mr-2 text-gray-500 flex-shrink-0" />
+                      <span className="truncate">{teacher.email}</span>
                     </div>
                     <div className="flex items-center text-sm">
-                      <Phone className="h-4 w-4 mr-2 text-gray-500" />
-                      {teacher.phone}
+                      <Phone className="h-4 w-4 mr-2 text-gray-500 flex-shrink-0" />
+                      <span>{teacher.phone}</span>
                     </div>
                   </div>
                   <div className="space-y-2">
                     <div className="flex items-center text-sm">
-                      <GraduationCap className="h-4 w-4 mr-2 text-gray-500" />
-                      {teacher.experience_years} years experience
+                      <GraduationCap className="h-4 w-4 mr-2 text-gray-500 flex-shrink-0" />
+                      <span>{teacher.experience_years} years experience</span>
                     </div>
-                    <div className="flex items-center text-sm">
-                      <FileText className="h-4 w-4 mr-2 text-gray-500" />
-                      {teacher.education_level}
+                    <div className="flex items-center text-sm truncate">
+                      <FileText className="h-4 w-4 mr-2 text-gray-500 flex-shrink-0" />
+                      <span className="truncate">{teacher.education_level}</span>
                     </div>
                   </div>
                   <div className="space-y-2">
                     <div className="text-sm">
-                      <span className="font-medium">Salary:</span> {teacher.salary_expectation}
+                      <span className="font-medium">Salary:</span> <span className="text-gray-600">{teacher.salary_expectation}</span>
                     </div>
                     <div className="text-sm">
-                      <span className="font-medium">Availability:</span> {teacher.availability}
+                      <span className="font-medium">Availability:</span> <span className="text-gray-600">{teacher.availability}</span>
                     </div>
                   </div>
                 </div>
-                <div className="mt-3">
+                <div className="mt-3 pt-3 border-t border-gray-100">
                   <p className="text-sm text-gray-600 line-clamp-2">{teacher.bio}</p>
                 </div>
               </CardContent>

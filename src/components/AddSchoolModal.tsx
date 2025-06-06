@@ -10,9 +10,10 @@ import { useToast } from "@/hooks/use-toast";
 
 interface AddSchoolModalProps {
   onSchoolAdded?: (school: any) => void;
+  isMobile?: boolean;
 }
 
-const AddSchoolModal: React.FC<AddSchoolModalProps> = ({ onSchoolAdded }) => {
+const AddSchoolModal: React.FC<AddSchoolModalProps> = ({ onSchoolAdded, isMobile = false }) => {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
@@ -88,9 +89,13 @@ const AddSchoolModal: React.FC<AddSchoolModalProps> = ({ onSchoolAdded }) => {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" className="border-2 border-amber-300 text-amber-700 hover:bg-amber-50 font-semibold px-6 py-3 rounded-xl shadow-lg hover:shadow-amber-500/25 transition-all duration-300 transform hover:scale-105">
-          <School className="h-5 w-5 mr-2" />
-          Add School
+        <Button variant="outline" className={`${
+          isMobile
+            ? "w-full justify-start text-sm py-3 border-amber-300 text-amber-700 hover:bg-amber-50 font-medium"
+            : "border-2 border-amber-300 text-amber-700 hover:bg-amber-50 font-semibold px-6 py-3 rounded-xl shadow-lg hover:shadow-amber-500/25 transition-all duration-300 transform hover:scale-105"
+        }`}>
+          <School className="h-4 w-4 mr-2" />
+          🏫 Add School
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">

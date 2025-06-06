@@ -1,14 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { 
-  Users, 
-  Target, 
-  Award, 
-  Heart, 
-  Lightbulb, 
-  Globe, 
+import {
+  Users,
+  Target,
+  Award,
+  Heart,
+  Lightbulb,
+  Globe,
   BookOpen,
   Printer,
   Palette,
@@ -20,11 +20,20 @@ import {
   ArrowRight,
   Zap,
   Shield,
-  TrendingUp
+  TrendingUp,
+  Menu,
+  X,
+  Home,
+  UserPlus,
+  Settings
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useAuth } from '@/contexts/AuthContext';
 
 const AboutUs = () => {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { user, profile } = useAuth();
+
   const services = [
     {
       icon: <GraduationCap className="h-8 w-8" />,
@@ -94,34 +103,99 @@ const AboutUs = () => {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
       {/* Navigation */}
       <nav className="bg-white/80 backdrop-blur-md border-b border-blue-100 sticky top-0 z-50 shadow-lg">
-        <div className="container mx-auto px-6 py-4">
+        <div className="container mx-auto px-4 sm:px-6 py-4">
           <div className="flex items-center justify-between">
-            <Link to="/" className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl flex items-center justify-center">
-                <BookOpen className="h-6 w-6 text-white" />
+            <Link to="/" className="flex items-center space-x-2 sm:space-x-3">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl flex items-center justify-center">
+                <BookOpen className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
               </div>
               <div>
-                <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                <h1 className="text-lg sm:text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                   MG Investments
                 </h1>
-                <p className="text-xs text-gray-600">Educational Excellence</p>
+                <p className="text-xs text-gray-600 hidden sm:block">Educational Excellence</p>
               </div>
             </Link>
-            <div className="flex items-center space-x-6">
+
+            {/* Desktop Navigation */}
+            <div className="hidden md:flex items-center space-x-6">
               <Link to="/" className="text-gray-700 hover:text-blue-600 transition-colors font-medium">
                 Home
               </Link>
               <Link to="/teacher-portal" className="text-gray-700 hover:text-blue-600 transition-colors font-medium">
                 Teacher Portal
               </Link>
-              <Link to="/admin" className="text-gray-700 hover:text-blue-600 transition-colors font-medium">
-                Admin
+              {user && profile?.role === 'admin' && (
+                <Link to="/admin" className="text-gray-700 hover:text-blue-600 transition-colors font-medium">
+                  Admin
+                </Link>
+              )}
+              <Link to="/auth">
+                <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg">
+                  Get Started
+                </Button>
               </Link>
-              <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg">
-                Get Started
-              </Button>
             </div>
+
+            {/* Mobile Menu Button */}
+            <button
+              type="button"
+              className="md:hidden p-2 rounded-lg hover:bg-blue-50 transition-colors"
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              aria-label="Toggle mobile menu"
+            >
+              {isMobileMenuOpen ? (
+                <X className="h-6 w-6 text-gray-700" />
+              ) : (
+                <Menu className="h-6 w-6 text-gray-700" />
+              )}
+            </button>
           </div>
+
+          {/* Mobile Navigation Menu */}
+          {isMobileMenuOpen && (
+            <div className="md:hidden border-t border-blue-200/50 bg-white/95 backdrop-blur-lg shadow-lg mt-4 rounded-lg overflow-hidden">
+              <div className="px-4 py-3 space-y-3">
+                <div className="space-y-1">
+                  <Link
+                    to="/"
+                    className="flex items-center text-gray-700 hover:text-blue-600 transition-colors font-medium py-3 px-2 rounded-lg hover:bg-blue-50 text-base"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <Home className="h-5 w-5 mr-3" />
+                    Home
+                  </Link>
+                  <Link
+                    to="/teacher-portal"
+                    className="flex items-center text-gray-700 hover:text-blue-600 transition-colors font-medium py-3 px-2 rounded-lg hover:bg-blue-50 text-base"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <GraduationCap className="h-5 w-5 mr-3" />
+                    Teacher Portal
+                  </Link>
+                  {user && profile?.role === 'admin' && (
+                    <Link
+                      to="/admin"
+                      className="flex items-center text-gray-700 hover:text-blue-600 transition-colors font-medium py-3 px-2 rounded-lg hover:bg-blue-50 text-base"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      <Settings className="h-5 w-5 mr-3" />
+                      Admin
+                    </Link>
+                  )}
+                  <Link
+                    to="/auth"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <Button className="w-full bg-gradient-to-r from-blue-600 to-purple-600 py-3 text-base font-medium justify-start">
+                      <UserPlus className="h-5 w-5 mr-3" />
+                      Get Started
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </nav>
 

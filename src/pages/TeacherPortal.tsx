@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -8,15 +8,18 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { GraduationCap, MapPin, Phone, DollarSign, Calendar, Eye, Star, Building2, Clock, Shield, Database, CheckCircle } from "lucide-react";
+import { GraduationCap, MapPin, Phone, DollarSign, Calendar, Eye, Star, Building2, Clock, Shield, Database, CheckCircle, Send, FileText, AlertCircle, LogOut } from "lucide-react";
 import { Link } from "react-router-dom";
 import JobPostings from '@/components/JobPostings';
 import { useAuth } from '@/contexts/AuthContext';
 import AdminDataImport from '@/components/AdminDataImport';
 import DataApprovalWorkflow from '@/components/DataApprovalWorkflow';
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from '@/integrations/supabase/client';
 
 const TeacherPortal = () => {
-  const { profile } = useAuth();
+  const { profile, user, signOut } = useAuth();
+  const { toast } = useToast();
   const isAdmin = profile?.role === 'admin';
 
   const [formData, setFormData] = useState({
@@ -31,6 +34,10 @@ const TeacherPortal = () => {
     salaryExpectation: '',
     bio: ''
   });
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [applicationStatus, setApplicationStatus] = useState<'draft' | 'submitted' | 'approved' | 'rejected'>('draft');
+  const [submittedAt, setSubmittedAt] = useState<string | null>(null);
 
   const jobListings = [
     {
@@ -72,6 +79,138 @@ const TeacherPortal = () => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
+  // Load existing teacher profile data
+  useEffect(() => {
+    const loadTeacherProfile = async () => {
+      if (user && profile?.role === 'teacher') {
+        try {
+          const { data: teacherData, error } = await supabase
+            .from('teachers')
+            .select('*')
+            .eq('id', user.id)
+            .single();
+
+          if (teacherData && !error) {
+            setFormData({
+              fullName: teacherData.full_name || '',
+              email: teacherData.email || '',
+              phone: teacherData.phone_number || '',
+              age: teacherData.age?.toString() || '',
+              location: teacherData.location || '',
+              experience: teacherData.experience_years?.toString() || '',
+              subject: teacherData.subject_specialization || '',
+              qualification: teacherData.education_level || '',
+              salaryExpectation: teacherData.salary_expectation || '',
+              bio: teacherData.bio || ''
+            });
+
+            // Check if application has been submitted
+            const { data: applicationData } = await supabase
+              .from('teacher_applications')
+              .select('*')
+              .eq('teacher_id', user.id)
+              .single();
+
+            if (applicationData) {
+              setApplicationStatus(applicationData.status || 'submitted');
+              setSubmittedAt(applicationData.submitted_at);
+            }
+          }
+        } catch (error) {
+          console.error('Error loading teacher profile:', error);
+        }
+      }
+    };
+
+    loadTeacherProfile();
+  }, [user, profile]);
+
+  const handleSubmitApplication = async () => {
+    if (!user || !profile) {
+      toast({
+        title: "Error",
+        description: "You must be logged in to submit an application",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate required fields
+    if (!formData.fullName || !formData.email || !formData.subject || !formData.qualification) {
+      toast({
+        title: "Incomplete Profile",
+        description: "Please fill in all required fields before submitting",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      // First, update the teacher profile
+      const { error: updateError } = await supabase
+        .from('teachers')
+        .upsert({
+          id: user.id,
+          full_name: formData.fullName,
+          email: formData.email,
+          phone_number: formData.phone,
+          age: parseInt(formData.age) || null,
+          location: formData.location,
+          experience_years: parseInt(formData.experience) || 0,
+          subject_specialization: formData.subject,
+          education_level: formData.qualification,
+          salary_expectation: formData.salaryExpectation,
+          bio: formData.bio,
+          status: 'pending',
+          last_updated: new Date().toISOString()
+        });
+
+      if (updateError) throw updateError;
+
+      // Create or update the application record
+      const applicationData = {
+        teacher_id: user.id,
+        teacher_name: formData.fullName,
+        teacher_email: formData.email,
+        teacher_phone: formData.phone,
+        subject_specialization: formData.subject,
+        education_level: formData.qualification,
+        experience_years: parseInt(formData.experience) || 0,
+        salary_expectation: formData.salaryExpectation,
+        bio: formData.bio,
+        location: formData.location,
+        status: 'pending',
+        submitted_at: new Date().toISOString(),
+        application_type: 'profile_submission'
+      };
+
+      const { error: applicationError } = await supabase
+        .from('teacher_applications')
+        .upsert(applicationData);
+
+      if (applicationError) throw applicationError;
+
+      setApplicationStatus('submitted');
+      setSubmittedAt(new Date().toISOString());
+
+      toast({
+        title: "Application Submitted!",
+        description: "Your teacher application has been submitted to the admin for review.",
+      });
+
+    } catch (error: any) {
+      console.error('Error submitting application:', error);
+      toast({
+        title: "Submission Failed",
+        description: error.message || "Failed to submit application. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -99,6 +238,15 @@ const TeacherPortal = () => {
               <Button size="sm" className="bg-gradient-to-r from-blue-600 to-teal-600">
                 <Star className="h-4 w-4 mr-2" />
                 Premium Access
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={signOut}
+                className="text-red-600 border-red-300 hover:bg-red-50"
+              >
+                <LogOut className="h-4 w-4 mr-2" />
+                Logout
               </Button>
             </div>
           </div>
@@ -242,13 +390,55 @@ const TeacherPortal = () => {
                       />
                     </div>
 
-                    <div className="flex gap-4">
+                    <div className="flex flex-col sm:flex-row gap-4">
                       <Button className="bg-gradient-to-r from-blue-600 to-teal-600 hover:from-blue-700 hover:to-teal-700">
                         Save Profile
                       </Button>
                       <Button variant="outline">
                         Preview Profile
                       </Button>
+
+                      {/* Submit Application Button */}
+                      {applicationStatus === 'draft' && (
+                        <Button
+                          onClick={handleSubmitApplication}
+                          disabled={isSubmitting}
+                          className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
+                        >
+                          {isSubmitting ? (
+                            <>
+                              <Clock className="h-4 w-4 mr-2 animate-spin" />
+                              Submitting...
+                            </>
+                          ) : (
+                            <>
+                              <Send className="h-4 w-4 mr-2" />
+                              Submit Application
+                            </>
+                          )}
+                        </Button>
+                      )}
+
+                      {applicationStatus === 'submitted' && (
+                        <div className="flex items-center text-blue-600">
+                          <FileText className="h-4 w-4 mr-2" />
+                          <span className="text-sm font-medium">Application Submitted</span>
+                        </div>
+                      )}
+
+                      {applicationStatus === 'approved' && (
+                        <div className="flex items-center text-green-600">
+                          <CheckCircle className="h-4 w-4 mr-2" />
+                          <span className="text-sm font-medium">Application Approved</span>
+                        </div>
+                      )}
+
+                      {applicationStatus === 'rejected' && (
+                        <div className="flex items-center text-red-600">
+                          <AlertCircle className="h-4 w-4 mr-2" />
+                          <span className="text-sm font-medium">Application Rejected</span>
+                        </div>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
@@ -325,14 +515,135 @@ const TeacherPortal = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="text-center py-12">
-                  <GraduationCap className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">No Applications Yet</h3>
-                  <p className="text-gray-600 mb-4">Start applying to teaching positions to see them here</p>
-                  <Button className="bg-gradient-to-r from-blue-600 to-teal-600">
-                    Browse Jobs
-                  </Button>
-                </div>
+                {applicationStatus === 'draft' ? (
+                  <div className="text-center py-12">
+                    <GraduationCap className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">No Applications Yet</h3>
+                    <p className="text-gray-600 mb-4">Complete your profile and submit your application to get started</p>
+                    <Button
+                      onClick={() => document.querySelector('[value="profile"]')?.click()}
+                      className="bg-gradient-to-r from-blue-600 to-teal-600"
+                    >
+                      Complete Profile
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <Card className="border-l-4 border-l-blue-500">
+                      <CardHeader className="pb-3">
+                        <div className="flex items-start justify-between">
+                          <div>
+                            <CardTitle className="text-lg">Teacher Application</CardTitle>
+                            <CardDescription>
+                              General teaching position application
+                            </CardDescription>
+                          </div>
+                          <Badge
+                            className={
+                              applicationStatus === 'submitted' ? 'bg-blue-100 text-blue-800' :
+                              applicationStatus === 'approved' ? 'bg-green-100 text-green-800' :
+                              applicationStatus === 'rejected' ? 'bg-red-100 text-red-800' :
+                              'bg-gray-100 text-gray-800'
+                            }
+                          >
+                            {applicationStatus === 'submitted' && <Clock className="h-3 w-3 mr-1" />}
+                            {applicationStatus === 'approved' && <CheckCircle className="h-3 w-3 mr-1" />}
+                            {applicationStatus === 'rejected' && <AlertCircle className="h-3 w-3 mr-1" />}
+                            {applicationStatus.charAt(0).toUpperCase() + applicationStatus.slice(1)}
+                          </Badge>
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                          <div>
+                            <span className="font-medium text-gray-700">Subject:</span>
+                            <span className="ml-2 text-gray-600">{formData.subject}</span>
+                          </div>
+                          <div>
+                            <span className="font-medium text-gray-700">Experience:</span>
+                            <span className="ml-2 text-gray-600">{formData.experience} years</span>
+                          </div>
+                          <div>
+                            <span className="font-medium text-gray-700">Qualification:</span>
+                            <span className="ml-2 text-gray-600">{formData.qualification}</span>
+                          </div>
+                          <div>
+                            <span className="font-medium text-gray-700">Location:</span>
+                            <span className="ml-2 text-gray-600">{formData.location}</span>
+                          </div>
+                        </div>
+
+                        {submittedAt && (
+                          <div className="mt-4 pt-4 border-t border-gray-100">
+                            <div className="flex items-center text-sm text-gray-500">
+                              <Calendar className="h-4 w-4 mr-2" />
+                              Submitted on {new Date(submittedAt).toLocaleDateString('en-US', {
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              })}
+                            </div>
+                          </div>
+                        )}
+
+                        {applicationStatus === 'submitted' && (
+                          <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+                            <div className="flex items-start">
+                              <Clock className="h-5 w-5 text-blue-600 mt-0.5 mr-2" />
+                              <div>
+                                <h4 className="text-sm font-medium text-blue-800">Under Review</h4>
+                                <p className="text-sm text-blue-600 mt-1">
+                                  Your application is being reviewed by our admin team. You'll be notified once a decision is made.
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {applicationStatus === 'approved' && (
+                          <div className="mt-4 p-3 bg-green-50 rounded-lg">
+                            <div className="flex items-start">
+                              <CheckCircle className="h-5 w-5 text-green-600 mt-0.5 mr-2" />
+                              <div>
+                                <h4 className="text-sm font-medium text-green-800">Application Approved!</h4>
+                                <p className="text-sm text-green-600 mt-1">
+                                  Congratulations! Your application has been approved. You can now apply for specific job positions.
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {applicationStatus === 'rejected' && (
+                          <div className="mt-4 p-3 bg-red-50 rounded-lg">
+                            <div className="flex items-start">
+                              <AlertCircle className="h-5 w-5 text-red-600 mt-0.5 mr-2" />
+                              <div>
+                                <h4 className="text-sm font-medium text-red-800">Application Needs Review</h4>
+                                <p className="text-sm text-red-600 mt-1">
+                                  Your application requires some updates. Please review your profile and resubmit.
+                                </p>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="mt-2 border-red-200 text-red-700 hover:bg-red-50"
+                                  onClick={() => {
+                                    setApplicationStatus('draft');
+                                    document.querySelector('[value="profile"]')?.click();
+                                  }}
+                                >
+                                  Update Profile
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>

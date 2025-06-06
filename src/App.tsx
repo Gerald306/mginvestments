@@ -16,6 +16,7 @@ import SchoolPortal from "./pages/SchoolPortal";
 import SubscriptionPage from "./pages/SubscriptionPage";
 import HireTeachers from "./pages/HireTeachers";
 import DatabaseTest from "./components/DatabaseTest";
+import ScheduleAppointment from "./pages/ScheduleAppointment";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -35,6 +36,7 @@ const App = () => (
             <Route path="/auth" element={<Auth />} />
             <Route path="/hire-teachers" element={<HireTeachers />} />
             <Route path="/subscription" element={<SubscriptionPage />} />
+            <Route path="/schedule-appointment" element={<ScheduleAppointment />} />
             <Route 
               path="/admin" 
               element={
