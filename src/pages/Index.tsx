@@ -143,18 +143,11 @@ const Index = () => {
                 <div className="flex items-center space-x-3">
                   <span className="text-sm text-gray-700">Welcome, {profile?.full_name || user.email}</span>
                   {profile?.role === 'admin' && (
-                    <>
-                      <Link to="/admin">
-                        <Button size="sm" className="bg-gradient-to-r from-blue-600 to-teal-600">
-                          Admin Dashboard
-                        </Button>
-                      </Link>
-                      <Link to="/teacher-portal">
-                        <Button size="sm" variant="outline" className="border-blue-300 text-blue-700 hover:bg-blue-50">
-                          Teacher Portal (Admin)
-                        </Button>
-                      </Link>
-                    </>
+                    <Link to="/admin">
+                      <Button size="sm" className="bg-gradient-to-r from-blue-600 to-teal-600">
+                        Admin Dashboard
+                      </Button>
+                    </Link>
                   )}
                   {profile?.role === 'teacher' && (
                     <Link to="/teacher-portal">

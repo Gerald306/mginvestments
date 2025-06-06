@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Users, Building2, CheckCircle, Clock, Eye, UserPlus, School, BarChart3, Mail, ArrowLeft, Home, TrendingUp, Activity, Zap } from "lucide-react";
+import { Users, Building2, CheckCircle, Clock, Eye, School, BarChart3, Mail, ArrowLeft, Home, TrendingUp, Activity, Zap, GraduationCap } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from '@/contexts/AuthContext';
 import { useRealTimeData } from '@/contexts/RealTimeDataContext';
@@ -19,6 +19,8 @@ import RealTimeTeachersDisplay from '@/components/RealTimeTeachersDisplay';
 import RealTimeSchoolsDisplay from '@/components/RealTimeSchoolsDisplay';
 import AdminDataImport from '@/components/AdminDataImport';
 import DataApprovalWorkflow from '@/components/DataApprovalWorkflow';
+import TeacherPortalDataImport from '@/components/TeacherPortalDataImport';
+import SchoolApprovalManagement from '@/components/SchoolApprovalManagement';
 
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
@@ -117,6 +119,12 @@ const AdminDashboard = () => {
               </div>
             </div>
             <div className="flex items-center space-x-4">
+              <Link to="/teacher-portal">
+                <Button variant="outline" className="border-teal-300 text-teal-700 hover:bg-teal-50 transition-all duration-300 hover:scale-105">
+                  <GraduationCap className="h-4 w-4 mr-2" />
+                  Teacher Portal
+                </Button>
+              </Link>
               <AddTeacherModal onTeacherAdded={addTeacher} />
               <AddSchoolModal onSchoolAdded={addSchool} />
             </div>
@@ -152,15 +160,55 @@ const AdminDashboard = () => {
           {/* Main Content */}
           <div className="lg:col-span-2">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-              <TabsList className="grid w-full grid-cols-8">
-                <TabsTrigger value="overview">Overview</TabsTrigger>
-                <TabsTrigger value="teachers">Teachers</TabsTrigger>
-                <TabsTrigger value="schools">Schools</TabsTrigger>
-                <TabsTrigger value="applications">Applications</TabsTrigger>
-                <TabsTrigger value="notifications">Notifications</TabsTrigger>
-                <TabsTrigger value="files">Files</TabsTrigger>
-                <TabsTrigger value="data-import">Data Import</TabsTrigger>
-                <TabsTrigger value="approvals">Approvals</TabsTrigger>
+              <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 h-auto lg:h-12 bg-white/80 backdrop-blur-sm border border-orange-200/50 rounded-lg shadow-lg gap-1 p-1">
+                <TabsTrigger
+                  value="overview"
+                  className="flex-1 text-xs sm:text-sm font-medium px-2 py-2 rounded-md transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-amber-500 data-[state=active]:text-white data-[state=active]:shadow-md hover:bg-orange-50"
+                >
+                  Overview
+                </TabsTrigger>
+                <TabsTrigger
+                  value="teachers"
+                  className="flex-1 text-xs sm:text-sm font-medium px-2 py-2 rounded-md transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-amber-500 data-[state=active]:text-white data-[state=active]:shadow-md hover:bg-orange-50"
+                >
+                  Teachers
+                </TabsTrigger>
+                <TabsTrigger
+                  value="schools"
+                  className="flex-1 text-xs sm:text-sm font-medium px-2 py-2 rounded-md transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-amber-500 data-[state=active]:text-white data-[state=active]:shadow-md hover:bg-orange-50"
+                >
+                  Schools
+                </TabsTrigger>
+                <TabsTrigger
+                  value="applications"
+                  className="flex-1 text-xs sm:text-sm font-medium px-2 py-2 rounded-md transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-amber-500 data-[state=active]:text-white data-[state=active]:shadow-md hover:bg-orange-50"
+                >
+                  Applications
+                </TabsTrigger>
+                <TabsTrigger
+                  value="portal-import"
+                  className="flex-1 text-xs sm:text-sm font-medium px-2 py-2 rounded-md transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-amber-500 data-[state=active]:text-white data-[state=active]:shadow-md hover:bg-orange-50"
+                >
+                  Portal Import
+                </TabsTrigger>
+                <TabsTrigger
+                  value="school-approvals"
+                  className="flex-1 text-xs sm:text-sm font-medium px-2 py-2 rounded-md transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-amber-500 data-[state=active]:text-white data-[state=active]:shadow-md hover:bg-orange-50"
+                >
+                  School Approvals
+                </TabsTrigger>
+                <TabsTrigger
+                  value="notifications"
+                  className="flex-1 text-xs sm:text-sm font-medium px-2 py-2 rounded-md transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-amber-500 data-[state=active]:text-white data-[state=active]:shadow-md hover:bg-orange-50"
+                >
+                  Notifications
+                </TabsTrigger>
+                <TabsTrigger
+                  value="files"
+                  className="flex-1 text-xs sm:text-sm font-medium px-2 py-2 rounded-md transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-amber-500 data-[state=active]:text-white data-[state=active]:shadow-md hover:bg-orange-50"
+                >
+                  Files
+                </TabsTrigger>
               </TabsList>
 
               <TabsContent value="overview" className="space-y-6">
@@ -248,20 +296,54 @@ const AdminDashboard = () => {
                 <ApplicationsManagement />
               </TabsContent>
 
+              <TabsContent value="portal-import" className="space-y-6">
+                <TeacherPortalDataImport />
+              </TabsContent>
+
+              <TabsContent value="school-approvals" className="space-y-6">
+                <SchoolApprovalManagement />
+              </TabsContent>
+
               <TabsContent value="notifications" className="space-y-6">
                 <NotificationSystem />
               </TabsContent>
 
               <TabsContent value="files" className="space-y-6">
-                <FileUploadManager />
-              </TabsContent>
+                <div className="space-y-6">
+                  <FileUploadManager />
 
-              <TabsContent value="data-import" className="space-y-6">
-                <AdminDataImport />
-              </TabsContent>
+                  {/* Data Import Section */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center">
+                        <Activity className="h-5 w-5 mr-2" />
+                        Advanced Data Import
+                      </CardTitle>
+                      <CardDescription>
+                        Import data from CSV, Excel, or JSON files with validation
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <AdminDataImport />
+                    </CardContent>
+                  </Card>
 
-              <TabsContent value="approvals" className="space-y-6">
-                <DataApprovalWorkflow />
+                  {/* Data Approval Workflow */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center">
+                        <CheckCircle className="h-5 w-5 mr-2" />
+                        Data Approval Workflow
+                      </CardTitle>
+                      <CardDescription>
+                        Review and approve imported data before publishing
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <DataApprovalWorkflow />
+                    </CardContent>
+                  </Card>
+                </div>
               </TabsContent>
             </Tabs>
           </div>
@@ -298,22 +380,86 @@ const AdminDashboard = () => {
                 <CardTitle className="text-lg">Quick Actions</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <Button className="w-full justify-start" variant="outline">
-                  <Mail className="h-4 w-4 mr-2" />
-                  Send Notifications
-                </Button>
-                <Button className="w-full justify-start" variant="outline">
-                  <Clock className="h-4 w-4 mr-2" />
-                  Check Expiring Accounts
-                </Button>
-                <Button className="w-full justify-start" variant="outline">
-                  <BarChart3 className="h-4 w-4 mr-2" />
-                  Generate Reports
-                </Button>
-                <Button className="w-full justify-start" variant="outline">
-                  <UserPlus className="h-4 w-4 mr-2" />
-                  Bulk Import Teachers
-                </Button>
+                {/* Primary Actions */}
+                <div className="space-y-2">
+                  <h4 className="text-sm font-semibold text-gray-700 mb-2">Core Management</h4>
+                  <Button
+                    className="w-full justify-start"
+                    variant="outline"
+                    onClick={() => setActiveTab("teachers")}
+                  >
+                    <Users className="h-4 w-4 mr-2" />
+                    Manage Teachers
+                  </Button>
+                  <Button
+                    className="w-full justify-start"
+                    variant="outline"
+                    onClick={() => setActiveTab("schools")}
+                  >
+                    <School className="h-4 w-4 mr-2" />
+                    Manage Schools
+                  </Button>
+                  <Button
+                    className="w-full justify-start"
+                    variant="outline"
+                    onClick={() => setActiveTab("applications")}
+                  >
+                    <CheckCircle className="h-4 w-4 mr-2" />
+                    Teacher Applications
+                  </Button>
+                </div>
+
+                {/* Approval Actions */}
+                <div className="space-y-2 pt-3 border-t">
+                  <h4 className="text-sm font-semibold text-gray-700 mb-2">Approvals & Import</h4>
+                  <Button
+                    className="w-full justify-start"
+                    variant="outline"
+                    onClick={() => setActiveTab("portal-import")}
+                  >
+                    <Activity className="h-4 w-4 mr-2" />
+                    Portal Data Import
+                  </Button>
+                  <Button
+                    className="w-full justify-start"
+                    variant="outline"
+                    onClick={() => setActiveTab("school-approvals")}
+                  >
+                    <Building2 className="h-4 w-4 mr-2" />
+                    School Approvals
+                  </Button>
+                  <Link to="/teacher-portal" className="block">
+                    <Button className="w-full justify-start" variant="outline">
+                      <GraduationCap className="h-4 w-4 mr-2" />
+                      Teacher Portal Access
+                    </Button>
+                  </Link>
+                </div>
+
+                {/* System Actions */}
+                <div className="space-y-2 pt-3 border-t">
+                  <h4 className="text-sm font-semibold text-gray-700 mb-2">System Tools</h4>
+                  <Button
+                    className="w-full justify-start"
+                    variant="outline"
+                    onClick={() => setActiveTab("notifications")}
+                  >
+                    <Mail className="h-4 w-4 mr-2" />
+                    Notifications
+                  </Button>
+                  <Button
+                    className="w-full justify-start"
+                    variant="outline"
+                    onClick={() => setActiveTab("files")}
+                  >
+                    <Activity className="h-4 w-4 mr-2" />
+                    Data & Files
+                  </Button>
+                  <Button className="w-full justify-start" variant="outline">
+                    <BarChart3 className="h-4 w-4 mr-2" />
+                    Generate Reports
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           </div>
