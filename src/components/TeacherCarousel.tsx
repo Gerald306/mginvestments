@@ -112,9 +112,9 @@ const TeacherCarousel: React.FC<TeacherCarouselProps> = ({ teachers }) => {
         setApi={setApi}
         className="w-full"
       >
-        <CarouselContent className="-ml-1 sm:-ml-2 md:-ml-4">
+        <CarouselContent className="gap-2 sm:gap-3 md:gap-4">
           {teachers.map((teacher, index) => (
-            <CarouselItem key={teacher.id} className="pl-1 sm:pl-2 md:pl-4 basis-full sm:basis-1/2 lg:basis-1/3 xl:basis-1/4">
+            <CarouselItem key={teacher.id} className="basis-full sm:basis-1/2 lg:basis-1/3 xl:basis-1/4">
               <Card className="border-0 shadow-lg hover:shadow-2xl transition-all duration-500 group bg-gradient-to-br from-white to-blue-50/30 overflow-hidden h-full">
                 <CardContent className="p-0 h-full">
                   {/* Header with gradient background */}
@@ -262,8 +262,8 @@ const TeacherCarousel: React.FC<TeacherCarouselProps> = ({ teachers }) => {
         </CarouselContent>
         
         {/* Custom navigation buttons */}
-        <CarouselPrevious className="hidden md:flex -left-12 bg-white/90 backdrop-blur-sm border-gray-200 hover:bg-white shadow-lg" />
-        <CarouselNext className="hidden md:flex -right-12 bg-white/90 backdrop-blur-sm border-gray-200 hover:bg-white shadow-lg" />
+        <CarouselPrevious className="hidden md:flex bg-white/90 backdrop-blur-sm border-gray-200 hover:bg-white shadow-lg" />
+        <CarouselNext className="hidden md:flex bg-white/90 backdrop-blur-sm border-gray-200 hover:bg-white shadow-lg" />
       </Carousel>
 
       {/* Mobile navigation dots */}
