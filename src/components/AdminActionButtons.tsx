@@ -35,8 +35,7 @@ import { websiteUpdateNotifier } from '@/services/websiteUpdateNotifier';
 import { reportGenerator } from '@/utils/reportGenerator';
 import { dataService } from '@/services/dataService';
 import { emailService, EmailTemplate } from '@/services/emailService';
-import { initializeFirebaseData, checkExistingData } from '@/utils/initializeFirebaseData';
-import { alertService } from '@/services/alertService';
+
 
 const AdminActionButtons: React.FC = () => {
   const [loading, setLoading] = useState<string | null>(null);
@@ -409,105 +408,7 @@ const AdminActionButtons: React.FC = () => {
     }
   };
 
-  const handleInitializeDatabase = async () => {
-    setLoading('initialize');
 
-    // Show immediate feedback
-    toast({
-      title: "Initializing Database... 🔥",
-      description: "Setting up sample data for testing",
-      duration: 2000,
-    });
-
-    try {
-      // Check if data already exists
-      const existingData = await checkExistingData();
-
-      if (existingData.hasData) {
-        toast({
-          title: "Database Already Initialized",
-          description: `Found ${existingData.teachers} teachers, ${existingData.schools} schools, ${existingData.applications} applications`,
-          duration: 5000,
-        });
-        return;
-      }
-
-      // Initialize with sample data
-      const result = await initializeFirebaseData();
-
-      if (result.success) {
-        // Refresh the data context
-        await refreshData();
-
-        toast({
-          title: "✅ Database Initialized Successfully!",
-          description: `Added ${result.data?.teachers} teachers, ${result.data?.schools} schools, ${result.data?.applications} applications`,
-          duration: 8000,
-        });
-
-        console.log('🎉 Database initialization completed:', result.data);
-      } else {
-        throw new Error(result.error?.message || 'Initialization failed');
-      }
-
-    } catch (error) {
-      console.error('❌ Database initialization failed:', error);
-
-      toast({
-        title: "❌ Initialization Failed",
-        description: error instanceof Error ? error.message : "Failed to initialize database. Please try again.",
-        variant: "destructive",
-        duration: 5000,
-      });
-    } finally {
-      setLoading(null);
-    }
-  };
-
-  const handleTestAlerts = async () => {
-    setLoading('alerts');
-
-    toast({
-      title: "Testing Alert System... 🔔",
-      description: "Triggering sample alerts for demonstration",
-      duration: 2000,
-    });
-
-    try {
-      // Test teacher alert
-      await alertService.simulateTeacherRegistration();
-
-      // Small delay between alerts
-      await new Promise(resolve => setTimeout(resolve, 500));
-
-      // Test school alert
-      await alertService.simulateSchoolRegistration();
-
-      // Small delay between alerts
-      await new Promise(resolve => setTimeout(resolve, 500));
-
-      // Test job post alert
-      await alertService.simulateJobPost();
-
-      toast({
-        title: "✅ Alert System Test Complete!",
-        description: "Sample alerts triggered! Check Teacher/School portals for in-app notifications and Alerts tab for email logs.",
-        duration: 8000,
-      });
-
-    } catch (error) {
-      console.error('❌ Alert test failed:', error);
-
-      toast({
-        title: "❌ Alert Test Failed",
-        description: error instanceof Error ? error.message : "Failed to test alert system.",
-        variant: "destructive",
-        duration: 5000,
-      });
-    } finally {
-      setLoading(null);
-    }
-  };
 
 
 
@@ -578,26 +479,7 @@ const AdminActionButtons: React.FC = () => {
       action: handlePushSchoolsToWebsite,
       badge: `ALL Schools`
     },
-    {
-      id: 'initialize',
-      title: 'Initialize Database',
-      description: 'Set up sample data for testing',
-      icon: <Zap className="h-6 w-6" />,
-      color: 'from-red-500 to-pink-500',
-      hoverColor: 'hover:from-red-600 hover:to-pink-600',
-      action: handleInitializeDatabase,
-      badge: 'Setup'
-    },
-    {
-      id: 'alerts',
-      title: 'Test Alert System',
-      description: 'Trigger sample alerts for demonstration',
-      icon: <AlertTriangle className="h-6 w-6" />,
-      color: 'from-orange-500 to-red-500',
-      hoverColor: 'hover:from-orange-600 hover:to-red-600',
-      action: handleTestAlerts,
-      badge: 'Demo'
-    }
+
   ];
 
   return (
