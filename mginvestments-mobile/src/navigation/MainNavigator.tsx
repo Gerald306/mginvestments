@@ -36,13 +36,13 @@ const MainNavigator: React.FC = () => {
   const getDashboardComponent = () => {
     switch (userProfile?.role) {
       case 'teacher':
-        return TeacherNavigator;
+        return () => <TeacherNavigator />;
       case 'school':
-        return SchoolNavigator;
+        return () => <SchoolNavigator />;
       case 'admin':
-        return AdminNavigator;
+        return () => <AdminNavigator />;
       default:
-        return TeacherNavigator;
+        return () => <TeacherNavigator />;
     }
   };
 
@@ -64,8 +64,8 @@ const MainNavigator: React.FC = () => {
         headerShown: false,
       })}
     >
-      <Tab.Screen 
-        name="Dashboard" 
+      <Tab.Screen
+        name="Dashboard"
         component={getDashboardComponent()}
         options={{
           tabBarLabel: userProfile?.role === 'admin' ? 'Admin' : 'Dashboard',

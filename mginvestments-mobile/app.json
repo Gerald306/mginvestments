@@ -34,7 +34,19 @@
       ]
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro",
+      "name": "MG Investments",
+      "shortName": "MG Investments",
+      "lang": "en",
+      "scope": "/",
+      "themeColor": "#1E40AF",
+      "backgroundColor": "#ffffff"
+    },
+    "analytics": {
+      "amplitude": {
+        "apiKey": null
+      }
     }
   }
 }
