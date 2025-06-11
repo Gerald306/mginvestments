@@ -147,13 +147,13 @@ $freeSpace = [math]::Round((Get-WmiObject -Class Win32_LogicalDisk -Filter "Devi
 if ($totalRAM -ge 8) {
     Add-TestResult "System RAM" $true "$totalRAM GB available"
 } else {
-    Add-TestResult "System RAM" $false "$totalRAM GB (8GB+ recommended)" "Consider upgrading RAM for better emulator performance"
+    Add-TestResult "System RAM" $false "$totalRAM GB available (8GB recommended)" "Consider upgrading RAM for better emulator performance"
 }
 
 if ($freeSpace -ge 10) {
     Add-TestResult "Disk Space" $true "$freeSpace GB free on C: drive"
 } else {
-    Add-TestResult "Disk Space" $false "$freeSpace GB free (10GB+ recommended)" "Free up disk space for emulator storage"
+    Add-TestResult "Disk Space" $false "$freeSpace GB free (10GB recommended)" "Free up disk space for emulator storage"
 }
 
 # Test 10: Node.js and Expo
