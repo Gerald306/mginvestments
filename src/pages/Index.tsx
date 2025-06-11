@@ -347,7 +347,7 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-teal-50">
       {/* Navigation */}
-      <nav className="bg-gradient-to-r from-white/95 via-blue-50/90 to-teal-50/95 backdrop-blur-lg border-b border-blue-200/50 sticky top-0 z-50 shadow-lg shadow-blue-100/20">
+      <nav className="bg-gradient-to-r from-white/95 via-blue-50/90 to-teal-50/95 backdrop-blur-lg border-b border-blue-200/50 shadow-lg shadow-blue-100/20">
         <div className="container mx-auto px-4 sm:px-6 py-3 sm:py-4">
           <div className="flex items-center justify-between">
             <Link to="/" className="flex items-center space-x-2 sm:space-x-3 min-w-0 flex-1 hover:opacity-80 transition-opacity duration-200 group">
