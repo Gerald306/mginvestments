@@ -4,15 +4,17 @@ import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// Firebase configuration - same as web app
+// Firebase configuration - UPDATE WITH YOUR ACTUAL CREDENTIALS
 const firebaseConfig = {
-  apiKey: "AIzaSyBvOkBwgKtQJGpKxKxKxKxKxKxKxKxKxKx",
-  authDomain: "mginvestments-project.firebaseapp.com",
-  projectId: "mginvestments-project",
-  storageBucket: "mginvestments-project.appspot.com",
-  messagingSenderId: "123456789012",
-  appId: "1:123456789012:web:abcdefghijklmnopqrstuvwxyz",
-  measurementId: "G-ABCDEFGHIJ"
+  // TODO: Replace with your actual Firebase project credentials
+  // Get these from: Firebase Console → Project Settings → General → Your apps
+  apiKey: "your-api-key-here",
+  authDomain: "your-project-id.firebaseapp.com",
+  projectId: "your-project-id",
+  storageBucket: "your-project-id.appspot.com",
+  messagingSenderId: "your-sender-id",
+  appId: "your-app-id",
+  measurementId: "your-measurement-id" // Optional for Analytics
 };
 
 // Initialize Firebase

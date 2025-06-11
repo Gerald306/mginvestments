@@ -13,15 +13,25 @@
       "backgroundColor": "#3B82F6"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.mginvestments.mobile",
+      "buildNumber": "1.0.0"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#1E40AF"
       },
+      "package": "com.mginvestments.mobile",
+      "versionCode": 1,
       "edgeToEdgeEnabled": true,
-      "package": "com.anonymous.mginvestmentsmobile"
+      "permissions": [
+        "CAMERA",
+        "RECORD_AUDIO",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "NOTIFICATIONS"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
