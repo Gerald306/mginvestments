@@ -5,6 +5,27 @@
 /* Smooth scrolling for anchor links */
 html {
   scroll-behavior: smooth;
+  overflow-x: hidden;
+}
+
+/* Prevent horizontal scrolling globally */
+body {
+  overflow-x: hidden;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/* Ensure all elements stay within viewport */
+* {
+  box-sizing: border-box;
+}
+
+/* Prevent any element from causing horizontal overflow */
+*,
+*::before,
+*::after {
+  max-width: 100%;
 }
 
 @layer base {
