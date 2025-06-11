@@ -62,40 +62,62 @@ if ($Firebase) {
 if ($Android) {
     Write-Host "📱 Setting up Android development..." -ForegroundColor Yellow
     Write-Host "====================================" -ForegroundColor Yellow
-    
-    # Check if Android Studio is installed
-    $androidStudioPath = "${env:ProgramFiles}\Android\Android Studio"
-    if (Test-Path $androidStudioPath) {
-        Write-Host "✅ Android Studio found" -ForegroundColor Green
-    } else {
-        Write-Host "⚠️  Android Studio not found" -ForegroundColor Yellow
-        Write-Host "Run setup-android-enhanced.ps1 to install Android Studio" -ForegroundColor Cyan
+
+    # Run Android setup test
+    Write-Host "Running Android setup test..." -ForegroundColor Cyan
+    if (Test-Path "test-android-setup.ps1") {
+        & .\test-android-setup.ps1
     }
-    
-    # Check Android SDK
-    $androidSdkPath = "${env:LOCALAPPDATA}\Android\Sdk"
-    if (Test-Path $androidSdkPath) {
-        Write-Host "✅ Android SDK found" -ForegroundColor Green
-    } else {
-        Write-Host "⚠️  Android SDK not found" -ForegroundColor Yellow
-    }
-    
-    # Check environment variables
-    $androidHome = [Environment]::GetEnvironmentVariable("ANDROID_HOME", "User")
-    if ($androidHome) {
-        Write-Host "✅ ANDROID_HOME configured" -ForegroundColor Green
-    } else {
-        Write-Host "⚠️  ANDROID_HOME not set" -ForegroundColor Yellow
-    }
-    
+
     Write-Host ""
-    Write-Host "📋 Android Setup Checklist:" -ForegroundColor Yellow
-    Write-Host "1. ⚠️  Install Android Studio" -ForegroundColor Yellow
-    Write-Host "2. ⚠️  Install Android SDK (API 30, 31, 33)" -ForegroundColor Yellow
-    Write-Host "3. ⚠️  Create Android Virtual Device" -ForegroundColor Yellow
-    Write-Host "4. ⚠️  Set environment variables" -ForegroundColor Yellow
+    Write-Host "📋 Android Setup Options:" -ForegroundColor Yellow
+    Write-Host "=========================" -ForegroundColor Yellow
+
+    $setupChoice = Read-Host @"
+Choose setup option:
+1. Test current setup only
+2. Install Android Studio and SDK
+3. Create recommended emulator
+4. Full Android setup (Studio + Emulator)
+Enter choice (1-4)
+"@
+
+    switch ($setupChoice) {
+        "1" {
+            Write-Host "✅ Android setup test completed" -ForegroundColor Green
+        }
+        "2" {
+            Write-Host "🔧 Installing Android Studio..." -ForegroundColor Cyan
+            if (Test-Path "setup-android-enhanced.ps1") {
+                & .\setup-android-enhanced.ps1
+            }
+        }
+        "3" {
+            Write-Host "📱 Creating recommended emulator..." -ForegroundColor Cyan
+            if (Test-Path "setup-android-emulator.ps1") {
+                & .\setup-android-emulator.ps1 -CreateRecommended
+            }
+        }
+        "4" {
+            Write-Host "🚀 Full Android setup..." -ForegroundColor Cyan
+            if (Test-Path "setup-android-enhanced.ps1") {
+                & .\setup-android-enhanced.ps1
+            }
+            Start-Sleep -Seconds 3
+            if (Test-Path "setup-android-emulator.ps1") {
+                & .\setup-android-emulator.ps1 -CreateRecommended
+            }
+        }
+        default {
+            Write-Host "ℹ️  Skipping Android setup" -ForegroundColor Gray
+        }
+    }
+
     Write-Host ""
-    Write-Host "💡 Run: .\setup-android-enhanced.ps1 for automated setup" -ForegroundColor Cyan
+    Write-Host "📱 Android Quick Commands:" -ForegroundColor Yellow
+    Write-Host "  .\manage-emulators.ps1 -Quick      # Quick start emulator" -ForegroundColor Cyan
+    Write-Host "  .\test-android-setup.ps1           # Test setup" -ForegroundColor Cyan
+    Write-Host "  npx expo start --android           # Start app on Android" -ForegroundColor Cyan
     Write-Host ""
 }
 
