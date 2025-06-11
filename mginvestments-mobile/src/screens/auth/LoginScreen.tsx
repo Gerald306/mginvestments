@@ -2,8 +2,6 @@ import React, { useState } from 'react';
 import {
   View,
   Text,
-  TextInput,
-  TouchableOpacity,
   StyleSheet,
   Alert,
   KeyboardAvoidingView,
@@ -13,6 +11,10 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { useAuth } from '../../contexts/AuthContext';
+import { useTheme } from '../../contexts/ThemeContext';
+import Button from '../../components/Button';
+import Input from '../../components/Input';
+import Card from '../../components/Card';
 import { AuthStackParamList } from '../../types';
 
 type LoginScreenNavigationProp = StackNavigationProp<AuthStackParamList, 'Login'>;
@@ -21,12 +23,32 @@ const LoginScreen: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState<{email?: string; password?: string}>({});
   const navigation = useNavigation<LoginScreenNavigationProp>();
   const { login } = useAuth();
+  const { colors } = useTheme();
+
+  const validateForm = () => {
+    const newErrors: {email?: string; password?: string} = {};
+
+    if (!email) {
+      newErrors.email = 'Email is required';
+    } else if (!/\S+@\S+\.\S+/.test(email)) {
+      newErrors.email = 'Please enter a valid email';
+    }
+
+    if (!password) {
+      newErrors.password = 'Password is required';
+    } else if (password.length < 6) {
+      newErrors.password = 'Password must be at least 6 characters';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleLogin = async () => {
-    if (!email || !password) {
-      Alert.alert('Error', 'Please fill in all fields');
+    if (!validateForm()) {
       return;
     }
 
@@ -51,56 +73,67 @@ const LoginScreen: React.FC = () => {
           <Text style={styles.subtitle}>Welcome back! Please sign in to continue.</Text>
         </View>
 
-        <View style={styles.form}>
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Email</Text>
-            <TextInput
-              style={styles.input}
-              value={email}
-              onChangeText={setEmail}
-              placeholder="Enter your email"
-              keyboardType="email-address"
-              autoCapitalize="none"
-              autoCorrect={false}
-            />
-          </View>
+        <Card variant="elevated" padding="large" style={styles.formCard}>
+          <Input
+            label="Email Address"
+            value={email}
+            onChangeText={(text) => {
+              setEmail(text);
+              if (errors.email) setErrors({...errors, email: undefined});
+            }}
+            placeholder="Enter your email"
+            keyboardType="email-address"
+            autoCapitalize="none"
+            autoCorrect={false}
+            leftIcon="mail"
+            error={errors.email}
+          />
 
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Password</Text>
-            <TextInput
-              style={styles.input}
-              value={password}
-              onChangeText={setPassword}
-              placeholder="Enter your password"
-              secureTextEntry
-              autoCapitalize="none"
-            />
-          </View>
+          <Input
+            label="Password"
+            value={password}
+            onChangeText={(text) => {
+              setPassword(text);
+              if (errors.password) setErrors({...errors, password: undefined});
+            }}
+            placeholder="Enter your password"
+            secureTextEntry
+            autoCapitalize="none"
+            leftIcon="lock-closed"
+            error={errors.password}
+          />
 
-          <TouchableOpacity
-            style={styles.forgotPassword}
+          <Button
+            title="Forgot Password?"
+            variant="ghost"
+            size="small"
             onPress={() => navigation.navigate('ForgotPassword')}
-          >
-            <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
-          </TouchableOpacity>
+            style={styles.forgotPasswordButton}
+          />
 
-          <TouchableOpacity
-            style={[styles.loginButton, loading && styles.disabledButton]}
+          <Button
+            title={loading ? 'Signing In...' : 'Sign In'}
             onPress={handleLogin}
+            loading={loading}
             disabled={loading}
-          >
-            <Text style={styles.loginButtonText}>
-              {loading ? 'Signing In...' : 'Sign In'}
-            </Text>
-          </TouchableOpacity>
+            icon="log-in"
+            fullWidth
+            style={styles.loginButton}
+          />
 
           <View style={styles.registerContainer}>
-            <Text style={styles.registerText}>Don't have an account? </Text>
-            <TouchableOpacity onPress={() => navigation.navigate('Register')}>
-              <Text style={styles.registerLink}>Sign Up</Text>
-            </TouchableOpacity>
+            <Text style={[styles.registerText, { color: colors.textSecondary }]}>
+              Don't have an account?{' '}
+            </Text>
+            <Button
+              title="Sign Up"
+              variant="ghost"
+              size="small"
+              onPress={() => navigation.navigate('Register')}
+              style={styles.registerButton}
+            />
           </View>
-        </View>
+        </Card>
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -109,7 +142,7 @@ const LoginScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#ffffff',
+    backgroundColor: '#f8fafc',
   },
   scrollContainer: {
     flexGrow: 1,
@@ -118,62 +151,30 @@ const styles = StyleSheet.create({
   },
   header: {
     alignItems: 'center',
-    marginBottom: 48,
+    marginBottom: 32,
   },
   title: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: '#1F2937',
+    color: '#1E40AF',
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 16,
-    color: '#6B7280',
+    color: '#64748B',
     textAlign: 'center',
+    lineHeight: 24,
   },
-  form: {
+  formCard: {
     width: '100%',
   },
-  inputContainer: {
-    marginBottom: 20,
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#374151',
-    marginBottom: 8,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#D1D5DB',
-    borderRadius: 8,
-    padding: 16,
-    fontSize: 16,
-    backgroundColor: '#F9FAFB',
-  },
-  forgotPassword: {
+  forgotPasswordButton: {
     alignSelf: 'flex-end',
-    marginBottom: 24,
-  },
-  forgotPasswordText: {
-    color: '#3B82F6',
-    fontSize: 14,
-    fontWeight: '500',
+    marginBottom: 16,
+    marginTop: -8,
   },
   loginButton: {
-    backgroundColor: '#3B82F6',
-    borderRadius: 8,
-    padding: 16,
-    alignItems: 'center',
     marginBottom: 24,
-  },
-  disabledButton: {
-    backgroundColor: '#9CA3AF',
-  },
-  loginButtonText: {
-    color: '#ffffff',
-    fontSize: 16,
-    fontWeight: '600',
   },
   registerContainer: {
     flexDirection: 'row',
@@ -181,13 +182,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   registerText: {
-    color: '#6B7280',
     fontSize: 14,
   },
-  registerLink: {
-    color: '#3B82F6',
-    fontSize: 14,
-    fontWeight: '600',
+  registerButton: {
+    marginLeft: -8,
   },
 });
 

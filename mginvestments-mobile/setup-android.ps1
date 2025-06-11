@@ -1,8 +1,11 @@
-# Android Studio Setup Script for MG Investments Mobile App
+# Enhanced Android Studio Setup Script for MG Investments Mobile App
 # Run this script as Administrator
 
 Write-Host "🚀 Setting up Android Development Environment for MG Investments" -ForegroundColor Green
 Write-Host "=================================================================" -ForegroundColor Green
+Write-Host ""
+Write-Host "This script will help you set up Android Studio and emulator for mobile app development." -ForegroundColor Yellow
+Write-Host ""
 
 # Check if running as Administrator
 if (-NOT ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")) {

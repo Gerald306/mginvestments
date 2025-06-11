@@ -126,17 +126,70 @@ export const theme = {
       height: 48,
       borderRadius: 8,
       paddingHorizontal: 24,
+      fontSize: 16,
+      fontWeight: '600',
+    },
+    buttonSecondary: {
+      height: 44,
+      borderRadius: 8,
+      paddingHorizontal: 20,
+      borderWidth: 1,
+    },
+    buttonSmall: {
+      height: 36,
+      borderRadius: 6,
+      paddingHorizontal: 16,
+      fontSize: 14,
     },
     input: {
       height: 48,
       borderRadius: 8,
       paddingHorizontal: 16,
       borderWidth: 1,
+      fontSize: 16,
+    },
+    inputSmall: {
+      height: 40,
+      borderRadius: 6,
+      paddingHorizontal: 12,
+      fontSize: 14,
     },
     card: {
       borderRadius: 12,
       padding: 16,
+      marginBottom: 12,
     },
+    cardSmall: {
+      borderRadius: 8,
+      padding: 12,
+      marginBottom: 8,
+    },
+    header: {
+      height: 56,
+      paddingHorizontal: 16,
+      elevation: 2,
+    },
+    tabBar: {
+      height: 60,
+      paddingBottom: 5,
+      paddingTop: 5,
+    },
+  },
+
+  // Animation durations
+  animations: {
+    fast: 150,
+    normal: 300,
+    slow: 500,
+  },
+
+  // Layout constants
+  layout: {
+    headerHeight: 56,
+    tabBarHeight: 60,
+    statusBarHeight: 24,
+    screenPadding: 16,
+    sectionSpacing: 24,
   },
 };
 
