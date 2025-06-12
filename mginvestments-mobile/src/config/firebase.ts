@@ -1,29 +1,46 @@
-import { initializeApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
+import { initializeApp, getApps } from 'firebase/app';
+import { getAuth, initializeAuth, getReactNativePersistence } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Platform } from 'react-native';
 
 // Firebase configuration for MG Investments Mobile App
-// You can either:
-// 1. Set environment variables in .env file, OR
-// 2. Replace the values directly here
-
 const firebaseConfig = {
-  apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY || "your-api-key-here",
-  authDomain: process.env.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN || "your-project-id.firebaseapp.com",
-  projectId: process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID || "your-project-id",
-  storageBucket: process.env.EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET || "your-project-id.appspot.com",
-  messagingSenderId: process.env.EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || "your-sender-id",
-  appId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID || "your-app-id",
-  measurementId: process.env.EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID || undefined
+  "apiKey": "AIzaSyDqvLi8ABcH9ZRtRspFcRgqVtHeQ8qXwfM",
+  "authDomain": "mg-investments-e8e1b.firebaseapp.com",
+  "projectId": "mg-investments-e8e1b",
+  "storageBucket": "mg-investments-e8e1b.firebasestorage.app",
+  "messagingSenderId": "418702249525",
+  "appId": "1:418702249525:web:5cf978f207a0c7ac5f2b7c",
+  "measurementId": "G-M1TC2CVPJH"
 };
 
 // Initialize Firebase
-const app = initializeApp(firebaseConfig);
+let app;
+if (getApps().length === 0) {
+  app = initializeApp(firebaseConfig);
+} else {
+  app = getApps()[0];
+}
 
-// Initialize Auth
-const auth = getAuth(app);
+// Initialize Auth with proper React Native persistence
+let auth;
+try {
+  if (Platform.OS === 'web') {
+    // For web platform, use regular getAuth
+    auth = getAuth(app);
+  } else {
+    // For React Native, use initializeAuth with AsyncStorage persistence
+    auth = initializeAuth(app, {
+      persistence: getReactNativePersistence(AsyncStorage)
+    });
+  }
+} catch (error) {
+  // If auth is already initialized, get the existing instance
+  console.log('Auth already initialized, using existing instance:', error.message);
+  auth = getAuth(app);
+}
 
 // Initialize Firestore
 const db = getFirestore(app);

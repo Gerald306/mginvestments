@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { GraduationCap, MapPin, Phone, DollarSign, Calendar, Eye, Star, Building2, Clock, Shield, Database, CheckCircle, Send, FileText, AlertCircle, LogOut, Save, Lock, Crown, User, School, Bell } from "lucide-react";
+import { GraduationCap, MapPin, Phone, DollarSign, Calendar, Eye, Star, Building2, Clock, Shield, Database, CheckCircle, Send, FileText, AlertCircle, LogOut, Save, Lock, Crown, User, School, Bell, BookOpen, Users, Award, Lightbulb } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import JobPostings from '@/components/JobPostings';
 import LockedJobPostings from '@/components/LockedJobPostings';
@@ -23,6 +23,170 @@ import DataApprovalWorkflow from '@/components/DataApprovalWorkflow';
 import { useToast } from "@/hooks/use-toast";
 import { firebase } from '@/integrations/firebase/client';
 import ScrollToTop from '@/components/ScrollToTop';
+import { Checkbox } from "@/components/ui/checkbox";
+import { useState as useReactState } from 'react';
+
+// Ugandan Education System Data
+const TEACHING_LEVELS = [
+  'Nursery',
+  'Lower Primary (P1-P3)',
+  'Upper Primary (P4-P7)',
+  'Secondary (S1-S6)'
+];
+
+const SUBJECTS_BY_LEVEL = {
+  'Nursery': [
+    'Pre-Reading Skills',
+    'Pre-Writing Skills',
+    'Pre-Math Skills',
+    'Creative Arts',
+    'Physical Education',
+    'Social Skills',
+    'Environmental Studies',
+    'Music and Movement',
+    'Story Telling',
+    'Play Activities'
+  ],
+  'Lower Primary (P1-P3)': [
+    'English',
+    'Mathematics',
+    'Science',
+    'Social Studies',
+    'Religious Education',
+    'Physical Education',
+    'Creative Arts',
+    'Local Language (Luganda)',
+    'Local Language (Runyankole)',
+    'Local Language (Ateso)',
+    'Local Language (Luo)',
+    'Local Language (Runyoro)',
+    'Local Language (Rukiga)',
+    'Local Language (Lusoga)',
+    'Local Language (Acholi)',
+    'Local Language (Langi)',
+    'Local Language (Alur)',
+    'Life Skills',
+    'Music',
+    'Art and Craft'
+  ],
+  'Upper Primary (P4-P7)': [
+    'English',
+    'Mathematics',
+    'Science',
+    'Social Studies',
+    'Religious Education (Christian)',
+    'Religious Education (Islamic)',
+    'Physical Education',
+    'Creative Arts',
+    'Local Language (Luganda)',
+    'Local Language (Runyankole)',
+    'Local Language (Ateso)',
+    'Local Language (Luo)',
+    'Local Language (Runyoro)',
+    'Local Language (Rukiga)',
+    'Local Language (Lusoga)',
+    'Local Language (Acholi)',
+    'Local Language (Langi)',
+    'Local Language (Alur)',
+    'Life Skills',
+    'Agriculture',
+    'Computer Studies',
+    'Music',
+    'Art and Craft',
+    'Home Economics'
+  ],
+  'Secondary (S1-S6)': [
+    // Core Subjects (Compulsory)
+    'English Language',
+    'Mathematics',
+    'Physics',
+    'Chemistry',
+    'Biology',
+    'Geography',
+    'History',
+    'Religious Education (Christian)',
+    'Religious Education (Islamic)',
+    'Physical Education',
+
+    // Languages
+    'Literature in English',
+    'French',
+    'German',
+    'Latin',
+    'Arabic',
+    'Luganda',
+    'Runyankole',
+    'Ateso',
+    'Luo',
+    'Runyoro',
+    'Rukiga',
+    'Lusoga',
+    'Acholi',
+    'Langi',
+    'Alur',
+    'Kiswahili',
+
+    // Sciences & Technology
+    'Computer Studies',
+    'Agriculture',
+    'Technical Drawing',
+    'Engineering Science',
+    'Applied Mathematics',
+    'General Paper',
+
+    // Arts & Humanities
+    'Fine Art',
+    'Music',
+    'Performing Arts',
+    'Literature',
+    'Philosophy',
+    'Divinity',
+    'Islamic Studies',
+
+    // Commercial & Business
+    'Economics',
+    'Commerce',
+    'Entrepreneurship',
+    'Accounting',
+    'Business Studies',
+    'Office Practice',
+
+    // Practical Subjects
+    'Food and Nutrition',
+    'Clothing and Textiles',
+    'Home Economics',
+    'Building Construction',
+    'Electrical Installation',
+    'Motor Vehicle Mechanics',
+    'Carpentry and Joinery',
+    'Plumbing',
+    'Masonry',
+    'Welding and Fabrication',
+    'Electronics',
+
+    // Additional Subjects
+    'Environmental Science',
+    'Political Education',
+    'Subsidiary Mathematics',
+    'General Studies',
+    'Communication Skills',
+    'Research Methods'
+  ]
+};
+
+const MARITAL_STATUS_OPTIONS = [
+  'Single',
+  'Married',
+  'Divorced',
+  'Widowed',
+  'Separated'
+];
+
+const PAYMENT_METHODS = [
+  'MTN Mobile Money',
+  'Airtel Money',
+  'Stanbic Bank'
+];
 
 const TeacherPortal = () => {
   const { profile, user, signOut } = useAuth();
@@ -69,9 +233,14 @@ const TeacherPortal = () => {
     age: '',
     location: '',
     experience: '',
+    teachingLevel: '',
     subject: '',
     qualification: '',
+    maritalStatus: '',
     salaryExpectation: '',
+    housingAllowance: false,
+    otherAllowances: false,
+    paymentMethod: '',
     bio: ''
   });
 
@@ -79,6 +248,7 @@ const TeacherPortal = () => {
   const [applicationStatus, setApplicationStatus] = useState<'draft' | 'submitted' | 'approved' | 'rejected'>('draft');
   const [submittedAt, setSubmittedAt] = useState<string | null>(null);
   const [showPreview, setShowPreview] = useState(false);
+  const [subjectSearch, setSubjectSearch] = useState('');
 
   const jobListings = [
     {
@@ -116,8 +286,15 @@ const TeacherPortal = () => {
     }
   ];
 
-  const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+  const handleInputChange = (field: string, value: string | boolean) => {
+    setFormData(prev => {
+      // Clear subject when teaching level changes
+      if (field === 'teachingLevel') {
+        console.log('Teaching level changed to:', value);
+        return { ...prev, [field]: value, subject: '' };
+      }
+      return { ...prev, [field]: value };
+    });
   };
 
   // Load existing teacher profile data
@@ -141,9 +318,14 @@ const TeacherPortal = () => {
               age: teacherData.age?.toString() || '',
               location: teacherData.location || '',
               experience: teacherData.experience_years?.toString() || '',
+              teachingLevel: teacherData.teaching_level || '',
               subject: teacherData.subject_specialization || '',
               qualification: teacherData.education_level || '',
+              maritalStatus: teacherData.marital_status || '',
               salaryExpectation: teacherData.salary_expectation || '',
+              housingAllowance: teacherData.housing_allowance || false,
+              otherAllowances: teacherData.other_allowances || false,
+              paymentMethod: teacherData.payment_method || '',
               bio: teacherData.bio || ''
             });
 
@@ -193,9 +375,14 @@ const TeacherPortal = () => {
           ...(formData.age && parseInt(formData.age) > 0 ? { age: parseInt(formData.age) } : {}),
           location: formData.location,
           experience_years: parseInt(formData.experience) || 0,
+          teaching_level: formData.teachingLevel,
           subject_specialization: formData.subject,
           education_level: formData.qualification,
+          marital_status: formData.maritalStatus,
           salary_expectation: formData.salaryExpectation,
+          housing_allowance: formData.housingAllowance,
+          other_allowances: formData.otherAllowances,
+          payment_method: formData.paymentMethod,
           bio: formData.bio,
           status: 'draft', // Keep as draft when just saving
           last_updated: new Date().toISOString()
@@ -237,7 +424,8 @@ const TeacherPortal = () => {
     }
 
     // Validate required fields
-    if (!formData.fullName || !formData.email || !formData.subject || !formData.qualification) {
+    if (!formData.fullName || !formData.email || !formData.phone || !formData.teachingLevel ||
+        !formData.subject || !formData.qualification || !formData.maritalStatus || !formData.paymentMethod) {
       toast({
         title: "Incomplete Profile",
         description: "Please fill in all required fields before submitting",
@@ -259,9 +447,14 @@ const TeacherPortal = () => {
           ...(formData.age && parseInt(formData.age) > 0 ? { age: parseInt(formData.age) } : {}),
           location: formData.location,
           experience_years: parseInt(formData.experience) || 0,
+          teaching_level: formData.teachingLevel,
           subject_specialization: formData.subject,
           education_level: formData.qualification,
+          marital_status: formData.maritalStatus,
           salary_expectation: formData.salaryExpectation,
+          housing_allowance: formData.housingAllowance,
+          other_allowances: formData.otherAllowances,
+          payment_method: formData.paymentMethod,
           bio: formData.bio,
           status: 'pending',
           last_updated: new Date().toISOString()
@@ -277,10 +470,15 @@ const TeacherPortal = () => {
         teacher_name: formData.fullName,
         teacher_email: formData.email,
         teacher_phone: formData.phone,
+        teaching_level: formData.teachingLevel,
         subject_specialization: formData.subject,
         education_level: formData.qualification,
+        marital_status: formData.maritalStatus,
         experience_years: parseInt(formData.experience) || 0,
         salary_expectation: formData.salaryExpectation,
+        housing_allowance: formData.housingAllowance,
+        other_allowances: formData.otherAllowances,
+        payment_method: formData.paymentMethod,
         bio: formData.bio,
         location: formData.location,
         status: 'pending',
@@ -481,6 +679,27 @@ const TeacherPortal = () => {
                         />
                       </div>
                       <div>
+                        <Label htmlFor="phone">Phone Number *</Label>
+                        <Input
+                          id="phone"
+                          value={formData.phone}
+                          onChange={(e) => handleInputChange('phone', e.target.value)}
+                          placeholder="+256 700 000 000"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="location">Location *</Label>
+                        <Input
+                          id="location"
+                          value={formData.location}
+                          onChange={(e) => handleInputChange('location', e.target.value)}
+                          placeholder="Kampala, Uganda"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div>
                         <Label htmlFor="experience">Years of Experience *</Label>
                         <Select onValueChange={(value) => handleInputChange('experience', value)}>
                           <SelectTrigger>
@@ -496,6 +715,102 @@ const TeacherPortal = () => {
                         </Select>
                       </div>
                       <div>
+                        <Label htmlFor="maritalStatus">Marital Status *</Label>
+                        <Select onValueChange={(value) => handleInputChange('maritalStatus', value)}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select marital status" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {MARITAL_STATUS_OPTIONS.map((status) => (
+                              <SelectItem key={status} value={status.toLowerCase()}>
+                                {status}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="teachingLevel">Teaching Level *</Label>
+                        <Select onValueChange={(value) => handleInputChange('teachingLevel', value)} value={formData.teachingLevel}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select teaching level" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {TEACHING_LEVELS.map((level) => (
+                              <SelectItem key={level} value={level}>
+                                <div className="flex items-center justify-between w-full">
+                                  <span>{level}</span>
+                                  <span className="text-xs text-gray-500 ml-2">
+                                    ({SUBJECTS_BY_LEVEL[level]?.length || 0} subjects)
+                                  </span>
+                                </div>
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label htmlFor="subject">
+                          Teaching Subject *
+                          {formData.teachingLevel && (
+                            <span className="text-xs text-gray-500 ml-1">
+                              ({SUBJECTS_BY_LEVEL[formData.teachingLevel]?.length || 0} available)
+                            </span>
+                          )}
+                        </Label>
+                        <Select
+                          onValueChange={(value) => handleInputChange('subject', value)}
+                          disabled={!formData.teachingLevel}
+                          value={formData.subject}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder={
+                              formData.teachingLevel
+                                ? "Select your teaching subject"
+                                : "Select teaching level first"
+                            } />
+                          </SelectTrigger>
+                          <SelectContent className="max-h-[400px]">
+                            {formData.teachingLevel && SUBJECTS_BY_LEVEL[formData.teachingLevel]?.map((subject, index) => (
+                              <SelectItem key={subject} value={subject.toLowerCase()}>
+                                <div className="flex items-center">
+                                  <span className="text-xs text-gray-400 mr-2 w-6">
+                                    {(index + 1).toString().padStart(2, '0')}.
+                                  </span>
+                                  <span>{subject}</span>
+                                </div>
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        {formData.teachingLevel && (
+                          <p className="text-xs text-gray-500 mt-1">
+                            ✅ Aligned with Uganda's {formData.teachingLevel} curriculum
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="qualification">Highest Qualification *</Label>
+                        <Select onValueChange={(value) => handleInputChange('qualification', value)}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select qualification" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="certificate">Certificate</SelectItem>
+                            <SelectItem value="diploma">Diploma</SelectItem>
+                            <SelectItem value="bachelor">Bachelor's Degree</SelectItem>
+                            <SelectItem value="master">Master's Degree</SelectItem>
+                            <SelectItem value="phd">PhD</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
                         <Label htmlFor="salaryExpectation">Salary Expectation (UGX) *</Label>
                         <Input
                           id="salaryExpectation"
@@ -506,39 +821,48 @@ const TeacherPortal = () => {
                       </div>
                     </div>
 
-                    <div className="grid md:grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="subject">Teaching Subject *</Label>
-                        <Select onValueChange={(value) => handleInputChange('subject', value)}>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select subject" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="mathematics">Mathematics</SelectItem>
-                            <SelectItem value="physics">Physics</SelectItem>
-                            <SelectItem value="chemistry">Chemistry</SelectItem>
-                            <SelectItem value="biology">Biology</SelectItem>
-                            <SelectItem value="english">English</SelectItem>
-                            <SelectItem value="history">History</SelectItem>
-                            <SelectItem value="geography">Geography</SelectItem>
-                            <SelectItem value="primary">Primary Education</SelectItem>
-                          </SelectContent>
-                        </Select>
+                    {/* Additional Priorities Section */}
+                    <div className="space-y-4">
+                      <Label className="text-base font-semibold">Additional Priorities</Label>
+                      <div className="grid md:grid-cols-2 gap-4">
+                        <div className="flex items-center space-x-2">
+                          <Checkbox
+                            id="housingAllowance"
+                            checked={formData.housingAllowance}
+                            onCheckedChange={(checked) => handleInputChange('housingAllowance', checked as boolean)}
+                          />
+                          <Label htmlFor="housingAllowance" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                            Housing Allowance
+                          </Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Checkbox
+                            id="otherAllowances"
+                            checked={formData.otherAllowances}
+                            onCheckedChange={(checked) => handleInputChange('otherAllowances', checked as boolean)}
+                          />
+                          <Label htmlFor="otherAllowances" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                            Other Allowances
+                          </Label>
+                        </div>
                       </div>
-                      <div>
-                        <Label htmlFor="qualification">Highest Qualification *</Label>
-                        <Select onValueChange={(value) => handleInputChange('qualification', value)}>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select qualification" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="diploma">Diploma</SelectItem>
-                            <SelectItem value="bachelor">Bachelor's Degree</SelectItem>
-                            <SelectItem value="master">Master's Degree</SelectItem>
-                            <SelectItem value="phd">PhD</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
+                    </div>
+
+                    {/* Payment Method Section */}
+                    <div>
+                      <Label htmlFor="paymentMethod">Preferred Payment Method *</Label>
+                      <Select onValueChange={(value) => handleInputChange('paymentMethod', value)}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select payment method" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {PAYMENT_METHODS.map((method) => (
+                            <SelectItem key={method} value={method.toLowerCase()}>
+                              {method}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
 
                     <div>

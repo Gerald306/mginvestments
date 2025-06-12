@@ -132,9 +132,15 @@ const SubscriptionPage = () => {
     },
     {
       name: "Airtel Money",
-      logo: "📲", 
+      logo: "📲",
       description: "Quick payment with Airtel Money",
       instructions: "Dial *185# to complete payment"
+    },
+    {
+      name: "Stanbic Bank",
+      logo: "🏦",
+      description: "Bank transfer or mobile banking",
+      instructions: "Use Stanbic mobile app or visit any branch"
     }
   ];
 
@@ -251,7 +257,7 @@ const SubscriptionPage = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid md:grid-cols-2 gap-6 mb-8">
+              <div className="grid md:grid-cols-3 gap-6 mb-8">
                 {paymentMethods.map((method, index) => (
                   <Card key={index} className="border-2 border-gray-200 hover:border-blue-400 transition-colors cursor-pointer">
                     <CardContent className="p-6 text-center">
@@ -271,10 +277,11 @@ const SubscriptionPage = () => {
                 <h3 className="font-semibold text-blue-900 mb-2">Payment Instructions:</h3>
                 <ol className="list-decimal list-inside space-y-2 text-sm text-blue-800">
                   <li>Select your preferred payment method above</li>
-                  <li>Follow the mobile money prompts on your phone</li>
+                  <li><strong>Mobile Money:</strong> Follow the prompts on your phone and enter your PIN</li>
+                  <li><strong>Stanbic Bank:</strong> Use mobile banking app or visit any branch</li>
                   <li>Enter the payment amount as shown in your selected plan</li>
-                  <li>Complete the transaction using your mobile money PIN</li>
                   <li>Your account will be upgraded immediately upon successful payment</li>
+                  <li>Contact support if you experience any payment issues</li>
                 </ol>
               </div>
             </CardContent>

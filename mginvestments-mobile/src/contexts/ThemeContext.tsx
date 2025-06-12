@@ -1,6 +1,5 @@
 import React, { createContext, useContext, ReactNode } from 'react';
-import { useAuth } from './AuthContext';
-import { theme, roleThemes, Theme, RoleTheme } from '../config/theme';
+import { theme, Theme } from '../config/theme';
 
 interface ThemeContextType {
   theme: Theme;
@@ -28,17 +27,8 @@ interface ThemeProviderProps {
 }
 
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
-  const { userProfile } = useAuth();
-  
-  // Get role-specific theme or default theme
-  const getCurrentTheme = (): Theme => {
-    if (userProfile?.role && userProfile.role in roleThemes) {
-      return roleThemes[userProfile.role as RoleTheme];
-    }
-    return theme;
-  };
-
-  const currentTheme = getCurrentTheme();
+  // Use default theme for now (no auth dependency)
+  const currentTheme = theme;
 
   const value: ThemeContextType = {
     theme: currentTheme,
