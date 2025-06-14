@@ -8,7 +8,7 @@ import {
   sendPasswordResetEmail
 } from 'firebase/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { auth, db } from '../config/firebase';
+import { getFirebaseAuth, getFirebaseDb } from '../config/firebase';
 import { User } from '../types';
 import { LoadingScreen } from '../components/LoadingScreen';
 
@@ -45,6 +45,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     let unsubscribe: (() => void) | undefined;
 
     try {
+      const auth = getFirebaseAuth();
+      const db = getFirebaseDb();
+
       unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
         setUser(firebaseUser);
 
@@ -112,6 +115,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
 
     try {
+      const auth = getFirebaseAuth();
       await signInWithEmailAndPassword(auth, email, password);
     } catch (error) {
       throw error;
@@ -120,8 +124,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const register = async (email: string, password: string, role: 'teacher' | 'school') => {
     try {
+      const auth = getFirebaseAuth();
+      const db = getFirebaseDb();
       const { user: firebaseUser } = await createUserWithEmailAndPassword(auth, email, password);
-      
+
       // Create user profile in Firestore
       const userProfile: User = {
         id: firebaseUser.uid,
@@ -140,6 +146,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const logout = async () => {
     try {
+      const auth = getFirebaseAuth();
       await signOut(auth);
       setUserProfile(null);
     } catch (error) {
@@ -149,6 +156,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const resetPassword = async (email: string) => {
     try {
+      const auth = getFirebaseAuth();
       await sendPasswordResetEmail(auth, email);
     } catch (error) {
       throw error;

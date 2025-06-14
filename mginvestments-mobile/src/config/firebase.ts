@@ -5,6 +5,12 @@ import { getStorage } from 'firebase/storage';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Platform } from 'react-native';
 
+// Ensure Firebase is only initialized once
+let app;
+let auth;
+let db;
+let storage;
+
 // Firebase configuration for MG Investments Mobile App
 const firebaseConfig = {
   "apiKey": "AIzaSyDqvLi8ABcH9ZRtRspFcRgqVtHeQ8qXwfM",
@@ -16,43 +22,71 @@ const firebaseConfig = {
   "measurementId": "G-M1TC2CVPJH"
 };
 
-// Initialize Firebase
-let app;
-if (getApps().length === 0) {
-  app = initializeApp(firebaseConfig);
-} else {
-  app = getApps()[0];
-}
-
-// Initialize Auth with proper React Native persistence
-let auth;
-try {
-  if (Platform.OS === 'web') {
-    // For web platform, use regular getAuth
-    auth = getAuth(app);
-  } else {
-    // For React Native, use initializeAuth with AsyncStorage persistence
-    try {
-      auth = initializeAuth(app, {
-        persistence: getReactNativePersistence(AsyncStorage)
-      });
-    } catch (initError) {
-      // If initializeAuth fails, fall back to getAuth
-      console.log('InitializeAuth failed, using getAuth:', initError.message);
-      auth = getAuth(app);
+// Initialize Firebase App
+function initializeFirebaseApp() {
+  if (!app) {
+    if (getApps().length === 0) {
+      app = initializeApp(firebaseConfig);
+    } else {
+      app = getApps()[0];
     }
   }
-} catch (error) {
-  // If auth is already initialized, get the existing instance
-  console.log('Auth already initialized, using existing instance:', error.message);
-  auth = getAuth(app);
+  return app;
+}
+
+// Initialize Auth
+function initializeFirebaseAuth() {
+  if (!auth) {
+    const firebaseApp = initializeFirebaseApp();
+
+    try {
+      if (Platform.OS === 'web') {
+        // For web platform, use regular getAuth
+        auth = getAuth(firebaseApp);
+      } else {
+        // For React Native, try initializeAuth first
+        try {
+          auth = initializeAuth(firebaseApp, {
+            persistence: getReactNativePersistence(AsyncStorage)
+          });
+        } catch (initError) {
+          // If initializeAuth fails, fall back to getAuth
+          console.log('InitializeAuth failed, using getAuth:', initError.message);
+          auth = getAuth(firebaseApp);
+        }
+      }
+    } catch (error) {
+      // If auth is already initialized, get the existing instance
+      console.log('Auth already initialized, using existing instance:', error.message);
+      auth = getAuth(firebaseApp);
+    }
+  }
+  return auth;
 }
 
 // Initialize Firestore
-const db = getFirestore(app);
+function initializeFirebaseFirestore() {
+  if (!db) {
+    const firebaseApp = initializeFirebaseApp();
+    db = getFirestore(firebaseApp);
+  }
+  return db;
+}
 
 // Initialize Storage
-const storage = getStorage(app);
+function initializeFirebaseStorage() {
+  if (!storage) {
+    const firebaseApp = initializeFirebaseApp();
+    storage = getStorage(firebaseApp);
+  }
+  return storage;
+}
 
-export { auth, db, storage };
-export default app;
+// Export initialized instances
+export const getFirebaseAuth = () => initializeFirebaseAuth();
+export const getFirebaseDb = () => initializeFirebaseFirestore();
+export const getFirebaseStorage = () => initializeFirebaseStorage();
+
+// Legacy exports for backward compatibility
+export { initializeFirebaseAuth as auth, initializeFirebaseFirestore as db, initializeFirebaseStorage as storage };
+export default initializeFirebaseApp;
