@@ -94,6 +94,7 @@ export interface Notification {
 
 // Navigation Types
 export type RootStackParamList = {
+  Landing: undefined;
   Auth: undefined;
   Main: undefined;
   Login: undefined;

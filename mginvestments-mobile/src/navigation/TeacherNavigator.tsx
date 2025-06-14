@@ -1,6 +1,7 @@
 import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 import TeacherDashboardScreen from '../screens/teacher/TeacherDashboardScreen';
+import ModernTeacherDashboard from '../screens/teacher/ModernTeacherDashboard';
 import JobSearchScreen from '../screens/teacher/JobSearchScreen';
 import ApplicationsScreen from '../screens/teacher/ApplicationsScreen';
 import TeacherProfileScreen from '../screens/teacher/TeacherProfileScreen';
@@ -22,10 +23,10 @@ const TeacherNavigator: React.FC = () => {
         },
       }}
     >
-      <Stack.Screen 
-        name="Dashboard" 
-        component={TeacherDashboardScreen}
-        options={{ title: 'Teacher Dashboard' }}
+      <Stack.Screen
+        name="Dashboard"
+        component={ModernTeacherDashboard}
+        options={{ headerShown: false }}
       />
       <Stack.Screen 
         name="Profile" 

@@ -47,6 +47,11 @@
       "amplitude": {
         "apiKey": null
       }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "0ee9c16f-3b31-4cc5-9434-8bcd2e1c3b93"
+      }
     }
   }
 }

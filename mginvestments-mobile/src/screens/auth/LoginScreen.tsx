@@ -121,6 +121,44 @@ const LoginScreen: React.FC = () => {
             style={styles.loginButton}
           />
 
+          {/* Demo Login Buttons */}
+          <View style={styles.demoSection}>
+            <Text style={styles.demoTitle}>Quick Demo Access</Text>
+            <Button
+              title="🎓 Teacher Portal"
+              variant="outline"
+              onPress={() => {
+                setEmail('demo@teacher.com');
+                setPassword('demo123');
+                setTimeout(() => handleLogin(), 100);
+              }}
+              fullWidth
+              style={styles.demoButton}
+            />
+            <Button
+              title="🏫 School Portal"
+              variant="outline"
+              onPress={() => {
+                setEmail('demo@school.com');
+                setPassword('demo123');
+                setTimeout(() => handleLogin(), 100);
+              }}
+              fullWidth
+              style={styles.demoButton}
+            />
+            <Button
+              title="⚙️ Admin Portal"
+              variant="outline"
+              onPress={() => {
+                setEmail('demo@admin.com');
+                setPassword('demo123');
+                setTimeout(() => handleLogin(), 100);
+              }}
+              fullWidth
+              style={styles.demoButton}
+            />
+          </View>
+
           <View style={styles.registerContainer}>
             <Text style={[styles.registerText, { color: colors.textSecondary }]}>
               Don't have an account?{' '}
@@ -174,7 +212,23 @@ const styles = StyleSheet.create({
     marginTop: -8,
   },
   loginButton: {
+    marginBottom: 16,
+  },
+  demoSection: {
     marginBottom: 24,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: '#E5E7EB',
+  },
+  demoTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#6B7280',
+    textAlign: 'center',
+    marginBottom: 12,
+  },
+  demoButton: {
+    marginBottom: 8,
   },
   registerContainer: {
     flexDirection: 'row',

@@ -65,6 +65,39 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }, []);
 
   const login = async (email: string, password: string) => {
+    // Handle demo logins
+    if (email.startsWith('demo@') && password === 'demo123') {
+      const demoUser = {
+        uid: `demo-${Date.now()}`,
+        email: email,
+        emailVerified: true,
+        displayName: null,
+        photoURL: null,
+        phoneNumber: null,
+        providerId: 'demo',
+        metadata: {
+          creationTime: new Date().toISOString(),
+          lastSignInTime: new Date().toISOString(),
+        },
+      } as FirebaseUser;
+
+      let role: 'teacher' | 'school' | 'admin' = 'teacher';
+      if (email === 'demo@school.com') role = 'school';
+      else if (email === 'demo@admin.com') role = 'admin';
+
+      const demoProfile: User = {
+        id: demoUser.uid,
+        email: email,
+        role,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      setUser(demoUser);
+      setUserProfile(demoProfile);
+      return;
+    }
+
     try {
       await signInWithEmailAndPassword(auth, email, password);
     } catch (error) {

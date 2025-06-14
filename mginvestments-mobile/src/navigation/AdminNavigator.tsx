@@ -1,6 +1,7 @@
 import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 import AdminDashboardScreen from '../screens/admin/AdminDashboardScreen';
+import ModernAdminDashboard from '../screens/admin/ModernAdminDashboard';
 import AdminTeachersScreen from '../screens/admin/AdminTeachersScreen';
 import AdminSchoolsScreen from '../screens/admin/AdminSchoolsScreen';
 import AdminApplicationsScreen from '../screens/admin/AdminApplicationsScreen';
@@ -24,10 +25,10 @@ const AdminNavigator: React.FC = () => {
         },
       }}
     >
-      <Stack.Screen 
-        name="Dashboard" 
-        component={AdminDashboardScreen}
-        options={{ title: 'Admin Dashboard' }}
+      <Stack.Screen
+        name="Dashboard"
+        component={ModernAdminDashboard}
+        options={{ headerShown: false }}
       />
       <Stack.Screen 
         name="Teachers" 

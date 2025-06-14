@@ -6,22 +6,29 @@ import {
   ActivityIndicator,
   ViewStyle,
   TextStyle,
+  View,
+  Pressable,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../contexts/ThemeContext';
+import { LinearGradient } from 'expo-linear-gradient';
 
 interface ButtonProps {
-  title: string;
+  title?: string;
   onPress: () => void;
-  variant?: 'primary' | 'secondary' | 'outline' | 'ghost';
-  size?: 'small' | 'medium' | 'large';
+  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'gradient' | 'danger';
+  size?: 'small' | 'medium' | 'large' | 'icon' | 'fab';
   loading?: boolean;
   disabled?: boolean;
   icon?: keyof typeof Ionicons.glyphMap;
   iconPosition?: 'left' | 'right';
+  iconOnly?: boolean;
   style?: ViewStyle;
   textStyle?: TextStyle;
   fullWidth?: boolean;
+  haptic?: boolean;
+  children?: React.ReactNode;
+  gradient?: string[];
 }
 
 const Button: React.FC<ButtonProps> = ({
@@ -33,11 +40,15 @@ const Button: React.FC<ButtonProps> = ({
   disabled = false,
   icon,
   iconPosition = 'left',
+  iconOnly = false,
   style,
   textStyle,
   fullWidth = false,
+  haptic = true,
+  children,
+  gradient,
 }) => {
-  const { colors, components } = useTheme();
+  const { colors, components, shadows } = useTheme();
 
   const getButtonStyle = (): ViewStyle => {
     const baseStyle = {
@@ -48,10 +59,12 @@ const Button: React.FC<ButtonProps> = ({
     };
 
     const sizeStyle = {
-      small: components.buttonSmall,
-      medium: components.button,
-      large: { ...components.button, height: 52, paddingHorizontal: 28 },
-    }[size];
+      small: components.button.small,
+      medium: components.button.primary,
+      large: components.button.large,
+      icon: components.button.icon,
+      fab: components.button.fab,
+    }[size] || components.button.primary;
 
     const variantStyle = {
       primary: {
@@ -62,13 +75,21 @@ const Button: React.FC<ButtonProps> = ({
       },
       outline: {
         backgroundColor: 'transparent',
-        borderWidth: 1,
+        borderWidth: 1.5,
         borderColor: colors.primary,
       },
       ghost: {
         backgroundColor: 'transparent',
       },
-    }[variant];
+      gradient: {
+        backgroundColor: 'transparent',
+      },
+      danger: {
+        backgroundColor: colors.error,
+      },
+    }[variant] || {
+      backgroundColor: colors.primary,
+    };
 
     const disabledStyle = disabled || loading ? {
       backgroundColor: colors.gray300,
@@ -100,7 +121,9 @@ const Button: React.FC<ButtonProps> = ({
       secondary: { color: colors.white },
       outline: { color: colors.primary },
       ghost: { color: colors.primary },
-    }[variant];
+      gradient: { color: colors.white },
+      danger: { color: colors.white },
+    }[variant] || { color: colors.white };
 
     const disabledStyle = disabled || loading ? {
       color: colors.gray500,
@@ -130,7 +153,9 @@ const Button: React.FC<ButtonProps> = ({
       secondary: colors.white,
       outline: colors.primary,
       ghost: colors.primary,
-    }[variant];
+      gradient: colors.white,
+      danger: colors.white,
+    }[variant] || colors.white;
   };
 
   const renderContent = () => {
@@ -162,6 +187,26 @@ const Button: React.FC<ButtonProps> = ({
       </>
     );
   };
+
+  if (variant === 'gradient' && gradient) {
+    return (
+      <LinearGradient
+        colors={gradient}
+        style={[getButtonStyle(), style]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0 }}
+      >
+        <TouchableOpacity
+          style={[{ flex: 1, alignItems: 'center', justifyContent: 'center' }]}
+          onPress={onPress}
+          disabled={disabled || loading}
+          activeOpacity={0.7}
+        >
+          {renderContent()}
+        </TouchableOpacity>
+      </LinearGradient>
+    );
+  }
 
   return (
     <TouchableOpacity
