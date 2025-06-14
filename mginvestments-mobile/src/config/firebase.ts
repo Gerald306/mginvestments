@@ -32,9 +32,15 @@ try {
     auth = getAuth(app);
   } else {
     // For React Native, use initializeAuth with AsyncStorage persistence
-    auth = initializeAuth(app, {
-      persistence: getReactNativePersistence(AsyncStorage)
-    });
+    try {
+      auth = initializeAuth(app, {
+        persistence: getReactNativePersistence(AsyncStorage)
+      });
+    } catch (initError) {
+      // If initializeAuth fails, fall back to getAuth
+      console.log('InitializeAuth failed, using getAuth:', initError.message);
+      auth = getAuth(app);
+    }
   }
 } catch (error) {
   // If auth is already initialized, get the existing instance

@@ -1,0 +1,103 @@
+{
+  "name": "MG Investments Mobile",
+  "short_name": "MG Investments",
+  "description": "Mobile investment platform for teachers, schools, and administrators",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#667eea",
+  "background_color": "#667eea",
+  "scope": "/",
+  "lang": "en",
+  "categories": ["finance", "education", "business"],
+  "icons": [
+    {
+      "src": "assets/icon-72.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "assets/icon-96.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "assets/icon-128.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "assets/icon-144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "assets/icon-152.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "assets/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "assets/icon-384.png",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "assets/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Teacher Portal",
+      "short_name": "Teacher",
+      "description": "Access teacher dashboard",
+      "url": "/?portal=teacher",
+      "icons": [
+        {
+          "src": "assets/teacher-icon.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "School Portal",
+      "short_name": "School",
+      "description": "Access school dashboard",
+      "url": "/?portal=school",
+      "icons": [
+        {
+          "src": "assets/school-icon.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Admin Portal",
+      "short_name": "Admin",
+      "description": "Access admin dashboard",
+      "url": "/?portal=admin",
+      "icons": [
+        {
+          "src": "assets/admin-icon.png",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false
+}
