@@ -3,7 +3,7 @@ import React from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { GraduationCap, Calendar } from 'lucide-react';
+import { GraduationCap, Calendar, MessageCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 interface Teacher {
@@ -99,11 +99,24 @@ const TeacherCard: React.FC<TeacherCardProps> = ({ teacher, showDetails = false 
 
             <div className="mt-4 flex space-x-2">
               {showDetails ? (
+<<<<<<< HEAD
                 <Button size="sm" className="bg-gradient-to-r from-blue-600 to-teal-600">
                   Contact Teacher
                 </Button>
               ) : (
                 <Link to="/subscription">
+=======
+                // Contact Teacher button - ALWAYS redirects to subscription page
+                <Link to="/subscription" state={{ from: 'hire-teachers', teacherId: teacher.id }}>
+                  <Button size="sm" className="bg-gradient-to-r from-blue-600 to-teal-600 hover:from-blue-700 hover:to-teal-700">
+                    <MessageCircle className="h-4 w-4 mr-2" />
+                    Contact Teacher
+                  </Button>
+                </Link>
+              ) : (
+                // View Full Profile button for non-detailed view
+                <Link to="/subscription" state={{ from: 'hire-teachers', teacherId: teacher.id }}>
+>>>>>>> master
                   <Button size="sm" variant="outline" className="hover:bg-blue-50">
                     View Full Profile
                   </Button>

@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { useSubscription } from '@/contexts/SubscriptionContext';
 import { useNotifications } from '@/contexts/NotificationContext';
+import { teacherCreditService } from '@/services/teacherCreditService';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -55,11 +57,14 @@ import NotificationPopup from '@/components/NotificationPopup';
 
 const SchoolPortal = () => {
   const { profile, user, signOut } = useAuth();
+  const { hasPremiumAccess, subscriptionStatus } = useSubscription();
   const { unreadCount } = useNotifications();
   const { toast } = useToast();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('dashboard');
   const [searchQuery, setSearchQuery] = useState('');
+  const [teacherCredits, setTeacherCredits] = useState(0);
+  const [canViewTeachers, setCanViewTeachers] = useState(false);
 
   // Check if user is admin accessing school portal
   const isAdmin = profile?.role === 'admin';
@@ -160,6 +165,70 @@ const SchoolPortal = () => {
     setJobForm(prev => ({ ...prev, [field]: value }));
   };
 
+  // Handle teacher contact with credit usage
+  const handleContactTeacher = async (teacherId: number) => {
+    if (!user) return;
+
+    try {
+      // Check if can contact teacher
+      const canContactResult = await teacherCreditService.canContactTeacher(user.id, teacherId.toString());
+
+      if (!canContactResult.canContact) {
+        // Redirect to subscription page
+        navigate('/subscription', {
+          state: {
+            from: 'school-portal',
+            teacherId: teacherId.toString(),
+            reason: canContactResult.reason
+          }
+        });
+        return;
+      }
+
+      if (canContactResult.hasContacted) {
+        toast({
+          title: "Already Contacted",
+          description: "You have already contacted this teacher. Check your contact history.",
+        });
+        return;
+      }
+
+      // Use credit if not on unlimited plan
+      if (!hasPremiumAccess) {
+        const useResult = await teacherCreditService.useCredit(user.id, teacherId.toString());
+
+        if (!useResult.success) {
+          toast({
+            title: "Error",
+            description: useResult.error || "Failed to use credit",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        // Update local credit count
+        setTeacherCredits(useResult.remainingCredits || 0);
+        setCanViewTeachers((useResult.remainingCredits || 0) > 0 || hasPremiumAccess);
+      }
+
+      toast({
+        title: "Teacher Contact Unlocked!",
+        description: `You can now contact this teacher. ${!hasPremiumAccess ? `Credits remaining: ${teacherCredits - 1}` : 'Unlimited contacts with your subscription.'}`,
+      });
+
+      // Here you would typically show the teacher's contact details
+      // For now, we'll just show a success message
+
+    } catch (error) {
+      console.error('Error contacting teacher:', error);
+      toast({
+        title: "Error",
+        description: "Failed to contact teacher. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleSignOut = async () => {
     try {
       await signOut();
@@ -176,6 +245,38 @@ const SchoolPortal = () => {
       });
     }
   };
+
+  // Check subscription status and credit balance
+  useEffect(() => {
+    const checkAccessStatus = async () => {
+      if (!user || !profile) return;
+
+      // Admin always has access
+      if (isAdmin) {
+        setCanViewTeachers(true);
+        return;
+      }
+
+      // Check if user has premium subscription
+      if (hasPremiumAccess) {
+        setCanViewTeachers(true);
+        return;
+      }
+
+      // Check credit balance
+      try {
+        const creditResult = await teacherCreditService.getCreditBalance(user.id);
+        if (creditResult.success) {
+          setTeacherCredits(creditResult.credits);
+          setCanViewTeachers(creditResult.credits > 0);
+        }
+      } catch (error) {
+        console.error('Error checking credit balance:', error);
+      }
+    };
+
+    checkAccessStatus();
+  }, [user, profile, isAdmin, hasPremiumAccess]);
 
   // Set document title
   useEffect(() => {
@@ -497,7 +598,7 @@ const SchoolPortal = () => {
         {/* Teachers Tab */}
         {activeTab === 'teachers' && (
           <div className="space-y-6">
-            {/* Search and Filter Header */}
+            {/* Subscription Status Header */}
             <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-blue-100/50">
               <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
                 <div>
@@ -505,26 +606,81 @@ const SchoolPortal = () => {
                   <p className="text-gray-600">Find qualified teachers for your institution</p>
                 </div>
                 <div className="flex items-center space-x-4">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                    <Input
-                      placeholder="Search teachers..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="pl-10 w-64 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
-                    />
+                  {/* Subscription Status */}
+                  <div className="flex items-center space-x-2">
+                    {hasPremiumAccess ? (
+                      <Badge className="bg-green-100 text-green-800 border-green-200">
+                        <Crown className="h-3 w-3 mr-1" />
+                        Unlimited Access
+                      </Badge>
+                    ) : teacherCredits > 0 ? (
+                      <Badge className="bg-blue-100 text-blue-800 border-blue-200">
+                        <Crown className="h-3 w-3 mr-1" />
+                        {teacherCredits} Credits
+                      </Badge>
+                    ) : (
+                      <Badge className="bg-amber-100 text-amber-800 border-amber-200">
+                        <Crown className="h-3 w-3 mr-1" />
+                        No Access
+                      </Badge>
+                    )}
                   </div>
-                  <Button variant="outline" size="sm" className="border-gray-200">
-                    <Filter className="h-4 w-4 mr-2" />
-                    Filters
-                  </Button>
+
+                  {canViewTeachers && (
+                    <>
+                      <div className="relative">
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                        <Input
+                          placeholder="Search teachers..."
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                          className="pl-10 w-64 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+                        />
+                      </div>
+                      <Button variant="outline" size="sm" className="border-gray-200">
+                        <Filter className="h-4 w-4 mr-2" />
+                        Filters
+                      </Button>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
 
-            {/* Enhanced Teacher Cards */}
-            <div className="grid gap-6">
-              {teachers.map((teacher) => (
+            {/* Teacher Access Check */}
+            {!canViewTeachers ? (
+              /* No Access - Show Subscription CTA */
+              <Card className="border-0 shadow-lg bg-gradient-to-r from-amber-50 via-orange-50 to-yellow-50 border-amber-200">
+                <CardContent className="p-8 text-center">
+                  <div className="w-16 h-16 bg-gradient-to-r from-amber-500 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Crown className="h-8 w-8 text-white" />
+                  </div>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-3">
+                    Get Access to Browse Teachers
+                  </h3>
+                  <p className="text-gray-600 mb-6 max-w-md mx-auto">
+                    Subscribe to view teacher profiles, contact information, and start hiring qualified teachers for your institution.
+                  </p>
+                  <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                    <Link to="/subscription" state={{ from: 'school-portal', plan: 'credits' }}>
+                      <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-3 text-lg font-semibold">
+                        <Crown className="h-5 w-5 mr-2" />
+                        Buy Teacher Credits
+                      </Button>
+                    </Link>
+                    <Link to="/subscription" state={{ from: 'school-portal', plan: 'monthly' }}>
+                      <Button variant="outline" className="border-amber-300 text-amber-700 hover:bg-amber-50 px-8 py-3 text-lg font-semibold">
+                        <Crown className="h-5 w-5 mr-2" />
+                        Monthly Unlimited
+                      </Button>
+                    </Link>
+                  </div>
+                </CardContent>
+              </Card>
+            ) : (
+              /* Has Access - Show Teacher Cards */
+              <div className="grid gap-6">
+                {teachers.map((teacher) => (
                 <Card key={teacher.id} className="border-0 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] bg-white/80 backdrop-blur-sm overflow-hidden">
                   <CardContent className="p-0">
                     <div className="flex">
@@ -646,19 +802,13 @@ const SchoolPortal = () => {
                         {/* Action Buttons */}
                         <div className="flex items-center justify-between">
                           <div className="flex space-x-3">
-                            {teacher.isRestricted ? (
-                              <Link to="/subscription">
-                                <Button className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white">
-                                  <Crown className="h-4 w-4 mr-2" />
-                                  Unlock Profile
-                                </Button>
-                              </Link>
-                            ) : (
-                              <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
-                                <MessageCircle className="h-4 w-4 mr-2" />
-                                Contact Teacher
-                              </Button>
-                            )}
+                            <Button
+                              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                              onClick={() => handleContactTeacher(teacher.id)}
+                            >
+                              <MessageCircle className="h-4 w-4 mr-2" />
+                              {hasPremiumAccess ? 'Contact Teacher' : `Contact (${teacherCredits > 0 ? '1 Credit' : 'Subscribe'})`}
+                            </Button>
                             <Button variant="outline" className="border-gray-300">
                               <Heart className="h-4 w-4 mr-2" />
                               Save
@@ -678,28 +828,36 @@ const SchoolPortal = () => {
                   </CardContent>
                 </Card>
               ))}
-            </div>
+              </div>
+            )}
 
-            {/* Premium Access CTA */}
-            <Card className="border-0 shadow-lg bg-gradient-to-r from-amber-50 via-orange-50 to-yellow-50 border-amber-200">
-              <CardContent className="p-8 text-center">
-                <div className="w-16 h-16 bg-gradient-to-r from-amber-500 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Crown className="h-8 w-8 text-white" />
-                </div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-3">
-                  Unlock Full Teacher Profiles
-                </h3>
-                <p className="text-gray-600 mb-6 max-w-md mx-auto">
-                  Get access to contact information, teacher locations, detailed experience, and direct communication with teachers.
-                </p>
-                <Link to="/subscription">
-                  <Button className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white px-8 py-3 text-lg font-semibold">
-                    <Crown className="h-5 w-5 mr-2" />
-                    Subscribe Now - Premium Access
-                  </Button>
-                </Link>
-              </CardContent>
-            </Card>
+            {/* Credit Usage Summary for subscribed users */}
+            {canViewTeachers && !hasPremiumAccess && (
+              <Card className="border-0 shadow-lg bg-gradient-to-r from-blue-50 via-purple-50 to-teal-50 border-blue-200">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="text-lg font-semibold text-gray-900 mb-1">Teacher Credits</h4>
+                      <p className="text-gray-600">You have {teacherCredits} credits remaining</p>
+                    </div>
+                    <div className="flex space-x-3">
+                      <Link to="/subscription" state={{ from: 'school-portal', plan: 'credits' }}>
+                        <Button variant="outline" className="border-blue-300 text-blue-700 hover:bg-blue-50">
+                          <Plus className="h-4 w-4 mr-2" />
+                          Buy More Credits
+                        </Button>
+                      </Link>
+                      <Link to="/subscription" state={{ from: 'school-portal', plan: 'monthly' }}>
+                        <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
+                          <Crown className="h-4 w-4 mr-2" />
+                          Upgrade to Unlimited
+                        </Button>
+                      </Link>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </div>
         )}
 

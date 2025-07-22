@@ -1,14 +1,20 @@
 {
-  "name": "vite_react_shadcn_ts",
+  "name": "mg-education-services",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "echo 'Run tests from tests/ directory'",
+    "test:frontend": "echo 'Frontend tests: tests/frontend/'",
+    "test:backend": "echo 'Backend tests: tests/backend/'",
+    "test:integration": "echo 'Integration tests: tests/integration/'",
+    "mobile": "cd mobile-app && npx expo start",
+    "backend": "cd backend && npm start"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
@@ -40,12 +46,15 @@
     "@radix-ui/react-toggle-group": "^1.1.0",
     "@radix-ui/react-tooltip": "^1.1.4",
     "@tanstack/react-query": "^5.56.2",
+    "@types/uuid": "^10.0.0",
+    "axios": "^1.10.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.0.0",
     "date-fns": "^3.6.0",
     "embla-carousel-react": "^8.6.0",
-    "firebase": "^11.9.0",
+    "expo": "^53.0.12",
+    "firebase": "^11.9.1",
     "html2canvas": "^1.4.1",
     "input-otp": "^1.2.4",
     "jspdf": "^3.0.1",
@@ -62,8 +71,10 @@
     "sonner": "^1.5.0",
     "tailwind-merge": "^2.5.2",
     "tailwindcss-animate": "^1.0.7",
+    "uuid": "^11.1.0",
     "vaul": "^0.9.3",
-    "zod": "^3.23.8"
+    "zod": "^3.23.8",
+    "react-native-web": "^0.20.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.9.0",

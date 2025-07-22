@@ -1,73 +1,117 @@
-# Welcome to your Lovable project
+# MG Education Services Platform 🎓
 
-## Project info
+Welcome to MG Education Services, a comprehensive platform connecting teachers with schools across Uganda.
 
-**URL**: https://lovable.dev/projects/6ee5b1d7-62b1-402c-9b7e-4e6d859cd81b
+## 🌟 Features
 
-## How can I edit this code?
+- **Teacher Registration & Profiles**: Complete teacher management system
+- **School Portal**: Advanced school registration and management
+- **Job Posting System**: Seamless job creation and application process
+- **Real-time Notifications**: Instant updates for all users
+- **Mobile App**: Native mobile experience with React Native + Expo
+- **Payment Integration**: MTN MoMo mobile money payments
+- **Secure Authentication**: Firebase-powered user management
 
-There are several ways of editing your application.
+## 🚀 Technology Stack
 
-**Use Lovable**
+- **Web Frontend**: React + TypeScript + Tailwind CSS
+- **Mobile App**: React Native + Expo SDK 53
+- **Backend**: Node.js + Express
+- **Database**: Firebase Firestore
+- **Authentication**: Firebase Auth
+- **Payments**: MTN MoMo API Integration
+- **Hosting**: Firebase Hosting
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/6ee5b1d7-62b1-402c-9b7e-4e6d859cd81b) and start prompting.
+## 📁 Project Structure
 
-Changes made via Lovable will be committed automatically to this repo.
+This project has been organized for better maintainability:
 
-**Use your preferred IDE**
+```
+📦 Project Root
+├── 🌐 src/                    # Web application
+├── 📱 mobile-app/             # React Native mobile app
+├── 🔧 backend/                # Express.js API server
+├── 🤝 shared/                 # Shared code between web & mobile
+├── 🧪 tests/                  # All test files organized
+├── 📚 docs/                   # Comprehensive documentation
+└── ⚙️ Configuration files
+```
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+For detailed structure information, see [PROJECT_STRUCTURE.md](./PROJECT_STRUCTURE.md)
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+## 🚀 Quick Start
 
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+### Web Application
+```bash
+npm install
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+### Mobile Application
+```bash
+cd mobile-app
+npm install
+npx expo start
+```
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+### Backend Services
+```bash
+cd backend
+npm install
+npm start
+```
 
-**Use GitHub Codespaces**
+## 📚 Documentation
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+**Setup Guides:**
+- [Firebase Setup](./docs/setup/FIREBASE_SETUP.md)
+- [Production Deployment](./docs/setup/PRODUCTION-SETUP-GUIDE.md)
+- [Responsive Design](./docs/setup/RESPONSIVE_DESIGN.md)
 
-## What technologies are used for this project?
+**API Integration:**
+- [Payment Integration](./docs/api/PAYMENT-INTEGRATION-GUIDE.md)
+- [MTN MoMo Setup](./docs/api/MTN-MOMO-SETUP-GUIDE.md)
+- [Teacher Credit System](./docs/api/TEACHER-CREDIT-SYSTEM-SUMMARY.md)
 
-This project is built with:
+**Mobile Development:**
+- [Android Setup](./docs/mobile/ANDROID_SETUP.md)
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## 🧪 Testing
 
-## How can I deploy this project?
+All tests are organized in the `tests/` directory:
+- **Backend Tests**: `tests/backend/`
+- **Frontend Tests**: `tests/frontend/`
+- **Integration Tests**: `tests/integration/`
 
-Simply open [Lovable](https://lovable.dev/projects/6ee5b1d7-62b1-402c-9b7e-4e6d859cd81b) and click on Share -> Publish.
+## 🔧 Available Scripts
 
-## Can I connect a custom domain to my Lovable project?
+**Web Application:**
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run preview` - Preview production build
 
-Yes, you can!
+**Mobile Application:**
+- `cd mobile-app && npx expo start` - Start Expo development server
+- `cd mobile-app && npx expo build` - Build mobile app
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+**Backend Services:**
+- `cd backend && npm start` - Start API server
+- `cd backend && npm run dev` - Start with nodemon
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+## 🤝 Contributing
+
+We welcome contributions! The project structure has been cleaned and organized for easier development:
+
+1. **Web development**: Work in the `src/` directory
+2. **Mobile development**: Work in the `mobile-app/` directory
+3. **Backend development**: Work in the `backend/` directory
+4. **Shared code**: Use the `shared/` directory for reusable components
+5. **Documentation**: Update relevant files in the `docs/` directory
+
+## 📄 License
+
+This project is licensed under the MIT License.
+
+---
+
+*Built with ❤️ for connecting teachers and schools across Uganda*
