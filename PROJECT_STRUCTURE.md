@@ -50,6 +50,12 @@
 │   │   ├── setup/             # Setup and configuration guides
 │   │   └── mobile/            # Mobile development guides
 │
+├── 🔧 **Scripts & Utilities**
+│   ├── scripts/               # Deployment and utility scripts
+│   │   ├── check-firebase.cjs         # Firebase connection check
+│   │   ├── deploy-rules.cjs           # Firestore rules deployment
+│   │   └── database-setup-teacher-credits.sql  # Database setup
+│
 └── ⚙️ **Configuration**
     ├── .vscode/               # VS Code workspace settings
     ├── firebase.json          # Firebase configuration

@@ -1,14 +1,20 @@
 {
-  "name": "vite_react_shadcn_ts",
+  "name": "mg-education-services",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "echo 'Run tests from tests/ directory'",
+    "test:frontend": "echo 'Frontend tests: tests/frontend/'",
+    "test:backend": "echo 'Backend tests: tests/backend/'",
+    "test:integration": "echo 'Integration tests: tests/integration/'",
+    "mobile": "cd mobile-app && npx expo start",
+    "backend": "cd backend && npm start"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
