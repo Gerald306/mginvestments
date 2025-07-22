@@ -164,34 +164,21 @@ router.post('/request-payment', async (req, res) => {
     // Get MTN config first
     const config = getMTNConfig();
     
-    // Validate currency based on environment
+    // Validate currency - Use UGX for both sandbox and production
     let apiCurrency = currency;
     let apiAmount = amount;
     
-    if (config.isProduction) {
-      // Production: Use actual currency
-      const supportedCurrency = config.supportedCurrency;
-      if (currency !== supportedCurrency) {
-        return res.status(400).json({
-          success: false,
-          error: `Invalid currency. Only ${supportedCurrency} is supported in production`
-        });
-      }
-      apiCurrency = currency;
-      apiAmount = amount;
-    } else {
-      // Sandbox: Convert to EUR for testing
-      if (currency === 'UGX') {
-        apiCurrency = 'EUR';
-        apiAmount = Math.round(amount / 4000); // Conversion for sandbox
-        if (apiAmount < 1) apiAmount = 1; // Minimum 1 EUR
-      } else if (currency !== 'EUR') {
-        return res.status(400).json({
-          success: false,
-          error: 'Invalid currency. Only UGX is supported'
-        });
-      }
+    // Only accept UGX currency
+    if (currency !== 'UGX') {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid currency. Only UGX is supported'
+      });
     }
+    
+    // Use UGX directly for both sandbox and production
+    apiCurrency = 'UGX';
+    apiAmount = amount;
     
     // Validate amount
     if (amount < 100 || amount > 1000000) {
